@@ -1,11 +1,20 @@
-// File: /api/gpt.js (Vercel Serverless Function)
+// File: /api/gpt.js (Vercel Serverless Function with body fix)
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { prompt } = req.body;
+  let body = req.body;
+  if (typeof body === 'string') {
+    try {
+      body = JSON.parse(body);
+    } catch (e) {
+      return res.status(400).json({ error: 'Invalid JSON body' });
+    }
+  }
+
+  const { prompt } = body;
   if (!prompt) {
     return res.status(400).json({ error: 'Prompt is required' });
   }
