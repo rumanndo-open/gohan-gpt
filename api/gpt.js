@@ -1,5 +1,3 @@
-// File: /api/gpt.js (Vercel Serverless Function with body fix)
-
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -19,6 +17,9 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Prompt is required' });
   }
 
+  // ここでログ出力して検証
+  console.log("OPENAI_API_KEY:", process.env.OPENAI_API_KEY);
+
   try {
     const openaiRes = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -36,6 +37,7 @@ export default async function handler(req, res) {
     const data = await openaiRes.json();
     res.status(200).json({ result: data.choices[0].message.content });
   } catch (err) {
+    console.error('OpenAI fetch failed:', err);
     res.status(500).json({ error: 'Failed to fetch from OpenAI', details: err.message });
   }
 }
