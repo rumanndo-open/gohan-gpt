@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ごはんGPT</title>
   <style>
     body {
@@ -89,10 +89,10 @@
     </select>
 
     <label>所持食材（任意）</label>
-    <input type="text" id="ingredients" placeholder="例：卵、冷凍うどん、ネギ">
+    <input type="text" id="ingredients" placeholder="例：卵、冷凍うどん、ネギ" />
 
     <label>ジャンル（任意）</label>
-    <input type="text" id="genre" placeholder="和食／中華など">
+    <input type="text" id="genre" placeholder="和食／中華など" />
 
     <button type="submit">提案して！</button>
   </form>
@@ -137,7 +137,10 @@
           const options = raw.split(/\n\s*\d+\. /).filter(s => s.trim());
           choicesBox.innerHTML = '<strong>以下から気になるメニューを選んでください：</strong>';
           options.forEach((opt, index) => {
-            const cleaned = opt.replace(/^■\s*/, '').replace(/\n■\s*([0-9]+分)/, '\n■ 調理時間：$1');
+            const cleaned = opt
+              .replace(/^■\s*/, '')
+              .replace(/\n■\s*([0-9]+分)/, '\n■ 調理時間：$1');
+
             const btn = document.createElement('div');
             btn.className = 'choice-btn';
             btn.textContent = `${index + 1}. ${cleaned}`;
