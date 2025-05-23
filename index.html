@@ -1,131 +1,51 @@
+// File: /api/gpt.js (Improved error logging and response check)
 // trigger redeploy for OpenAI quota reset
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ごはんGPT</title>
-  <style>
-    body {
-      font-family: "Hiragino Kaku Gothic ProN", sans-serif;
-      padding: 20px;
-      max-width: 600px;
-      margin: auto;
-      background-color: #fefefe;
-      color: #333;
+
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  let body = req.body;
+  if (typeof body === 'string') {
+    try {
+      body = JSON.parse(body);
+    } catch (e) {
+      return res.status(400).json({ error: 'Invalid JSON body' });
     }
-    h1 {
-      text-align: center;
-      font-size: 1.8em;
-      margin-bottom: 30px;
-      color: #2c3e50;
-    }
-    form {
-      background: #ffffff;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.05);
-    }
-    label {
-      margin-bottom: 10px;
-      font-weight: bold;
-      display: block;
-    }
-    select, input, button {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 20px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      font-size: 1em;
-    }
-    button {
-      background-color: #2ecc71;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #27ae60;
-    }
-    .result {
-      margin-top: 30px;
-      padding: 20px;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      background-color: #fafafa;
-      white-space: pre-wrap;
-    }
-  </style>
-</head>
-<body>
-  <section style="margin-bottom: 30px; background: #eafaf1; padding: 20px; border-radius: 10px; border: 1px solid #d5f5e3;">
-    <h2 style="margin-top: 0; color: #1e8449;">ごはんGPTとは？</h2>
-    <p>
-      ごはんGPTは、毎日の「何食べよう…」という悩みを解決するためのスマホ対応型Webアプリです。
-      気分・予算・動ける範囲・冷蔵庫の中身などを選ぶだけで、ChatGPTが「自炊」「冷食アレンジ」「出前」「外食」など
-      その日のあなたにぴったりな食の選択肢を提案します。忙しい毎日でも、ちょっとした入力だけで食の意思決定がスムーズに！
-    </p>
-  </section>
-  <h1>🍱 ごはんGPT</h1>
-  <form id="gohanForm">
-    <label>気分</label>
-    <select id="mood">
-      <option>疲れてる</option>
-      <option>リフレッシュしたい</option>
-      <option>ガッツリ</option>
-      <option>サッパリ</option>
-      <option>特に決まってない</option>
-    </select>
+  }
 
-    <label>動ける範囲</label>
-    <select id="range">
-      <option>家から出たくない</option>
-      <option>出てもいい</option>
-      <option>外で食べたい</option>
-    </select>
+  const { prompt } = body;
+  if (!prompt) {
+    return res.status(400).json({ error: 'Prompt is required' });
+  }
 
-    <label>予算</label>
-    <select id="budget">
-      <option>〜500円</option>
-      <option>〜1,000円</option>
-      <option>あまり気にしない</option>
-    </select>
+  console.log("OPENAI_API_KEY:", process.env.OPENAI_API_KEY);
 
-    <label>所持食材（任意）</label>
-    <input type="text" id="ingredients" placeholder="例：卵、冷凍うどん、ネギ">
-
-    <label>ジャンル（任意）</label>
-    <input type="text" id="genre" placeholder="和食／中華など">
-
-    <button type="submit">提案して！</button>
-  </form>
-
-  <div class="result" id="result"></div>
-
-  <script>
-    const form = document.getElementById('gohanForm');
-    const resultBox = document.getElementById('result');
-
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      resultBox.textContent = '提案を生成中...';
-
-      const prompt = `以下の条件をもとに、今日の“最適なごはん”を提案してください：\n\n` +
-        `【気分】：${mood.value}\n【動ける範囲】：${range.value}\n【予算】：${budget.value}\n` +
-        `【所持食材】：${ingredients.value || '特になし'}\n【ジャンル】：${genre.value || '指定なし'}\n\n` +
-        `【出力形式】：\n■ 提案タイプ（自炊/冷食/出前/外食）：\n■ メニュー名 / 店名：\n■ 所要時間 or 難易度：\n■ 理由：\n■ アドバイス：`;
-
-      try {
-        const response = await fetch('/api/gpt', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ prompt })
-        });
-
-        const data = await response.json();
-        resultBox.textContent = data.result;
-      } catch (error) {
-        resultBox.textContent = 'エラーが発生しました：' + error.message;
-      }
+  try {
+    const openaiRes = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: 'gpt-3.5-turbo',
+        messages: [{ role: 'user', content: prompt }],
+        temperature: 0.7
+      })
     });
-  </script>
-</body>
+
+    const data = await openaiRes.json();
+    console.log("OpenAI response:", JSON.stringify(data, null, 2));
+
+    if (!data.choices || !data.choices[0]) {
+      return res.status(500).json({ error: 'OpenAI returned no choices', fullResponse: data });
+    }
+
+    res.status(200).json({ result: data.choices[0].message.content });
+  } catch (err) {
+    console.error('OpenAI fetch failed:', err);
+    res.status(500).json({ error: 'Failed to fetch from OpenAI', details: err.message });
+  }
+}
