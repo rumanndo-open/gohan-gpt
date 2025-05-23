@@ -100,100 +100,82 @@
   <div class="choices" id="choices"></div>
   <div class="result" id="result"></div>
 
-<script>
-  const form = document.getElementById('gohanForm');
-  const resultBox = document.getElementById('result');
-  const choicesBox = document.getElementById('choices');
+  <script>
+    const form = document.getElementById('gohanForm');
+    const resultBox = document.getElementById('result');
+    const choicesBox = document.getElementById('choices');
 
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    resultBox.textContent = '';
-    choicesBox.innerHTML = '提案を生成中...';
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      resultBox.textContent = '';
+      choicesBox.innerHTML = '提案を生成中...';
 
-    const mood = document.getElementById('mood').value;
-    const range = document.getElementById('range').value;
-    const budget = document.getElementById('budget').value;
-    const ingredients = document.getElementById('ingredients').value;
-    const genre = document.getElementById('genre').value;
+      const mood = document.getElementById('mood').value;
+      const range = document.getElementById('range').value;
+      const budget = document.getElementById('budget').value;
+      const ingredients = document.getElementById('ingredients').value;
+      const genre = document.getElementById('genre').value;
 
-    const body = { mood, range, budget, ingredients, genre };
+      const body = { mood, range, budget, ingredients, genre };
 
-    try {
-      const response = await fetch('/api/gpt', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify(body)
-      });
-
-      const data = await response.json();
-
-      if (data.error) {
-        choicesBox.textContent = 'エラー: ' + data.error.message;
-      } else {
-        const raw = data.result.replace(/#+ 選択肢一覧\s*/i, '');
-        const options = raw.split(/\n\s*\d+\.\s*/).filter(s => s.trim());
-
-        choicesBox.innerHTML = '<strong>以下から気になるメニューを選んでください：</strong>';
-
-        options.forEach((opt, index) => {
-          const cleaned = opt
-            .replace(/^■\s*/, '')
-            .replace(/\n■\s*([0-9]+分)/, '\n■ 調理時間：$1');
-
-          const btn = document.createElement('div');
-          btn.className = 'choice-btn';
-          btn.textContent = `${index + 1}. ${cleaned}`;
-
-          btn.addEventListener('click', async () => {
-            resultBox.textContent = '詳細レシピを生成中...';
-            const selectedTitle = cleaned.split('\n')[0].replace(/^■\s*/, '').trim();
-
-            const prompt = `料理名：「${selectedTitle}」
-
-以下の形式で、家庭で簡単に作れるレシピを日本語で出力してください。
-
-■ 材料：
-・...
-
-■ 作り方（5ステップ以内）：
-1. ...
-2. ...
-3. ...
-
-※ 専門的すぎる表現や高価な材料を避けてください。`;
-
-            try {
-              const detailRes = await fetch('/api/gpt', {
-                method: 'POST',
-                headers: {
-                  'Content-Type': 'application/json',
-                  'Accept': 'application/json'
-                },
-                body: JSON.stringify({ prompt })
-              });
-
-              const detailData = await detailRes.json();
-              resultBox.textContent =
-                detailData.result ||
-                (detailData.error?.message
-                  ? 'エラー: ' + detailData.error.message
-                  : 'レシピ生成に失敗しました（理由不明）');
-            } catch (error) {
-              resultBox.textContent = '詳細レシピの取得中にエラーが発生しました：' + error.message;
-            }
-          });
-
-          choicesBox.appendChild(btn);
+      try {
+        const response = await fetch('/api/gpt', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(body)
         });
-      }
-    } catch (error) {
-      choicesBox.textContent = 'エラーが発生しました：' + error.message;
-    }
-  });
-</script>
 
+        const data = await response.json();
+
+        if (data.error) {
+          choicesBox.textContent = 'エラー: ' + data.error.message;
+        } else {
+          const raw = data.result.replace(/#+ 選択肢一覧\s*/i, '');
+          const options = raw.split(/\n\s*\d+\.\s*/).filter(s => s.trim());
+
+          choicesBox.innerHTML = '<strong>以下から気になるメニューを選んでください：</strong>';
+
+          options.forEach((opt, index) => {
+            const cleaned = opt
+              .replace(/^■\s*/, '')
+              .replace(/\n■\s*([0-9]+分)/, '\n■ 調理時間：$1');
+
+            const btn = document.createElement('div');
+            btn.className = 'choice-btn';
+            btn.textContent = `${index + 1}. ${cleaned}`;
+
+            btn.addEventListener('click', async () => {
+              resultBox.textContent = '詳細レシピを生成中...';
+              const selectedTitle = cleaned.split('\n')[0].replace(/^■\s*/, '').trim();
+              const prompt = `次のメニュー「${selectedTitle}」の詳細レシピを提案してください。必要な材料と具体的な手順を5ステップ以内で簡潔に出力してください。`;
+
+              try {
+                const detailRes = await fetch('/api/gpt', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                  },
+                  body: JSON.stringify({ prompt })
+                });
+
+                const detailData = await detailRes.json();
+                resultBox.textContent = detailData.result || 'レシピ生成に失敗しました';
+              } catch (error) {
+                resultBox.textContent = '詳細レシピの取得中にエラーが発生しました：' + error.message;
+              }
+            });
+
+            choicesBox.appendChild(btn);
+          });
+        }
+      } catch (error) {
+        choicesBox.textContent = 'エラーが発生しました：' + error.message;
+      }
+    });
+  </script>
 </body>
 </html>
