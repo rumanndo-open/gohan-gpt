@@ -1,44 +1,142 @@
-<script>
-  const form = document.getElementById('gohanForm');
-  const resultBox = document.getElementById('result');
-
-  form.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    resultBox.textContent = '提案を生成中...';
-
-    const mood = document.getElementById('mood').value;
-    const range = document.getElementById('range').value;
-    const budget = document.getElementById('budget').value;
-    const ingredients = document.getElementById('ingredients').value;
-    const genre = document.getElementById('genre').value;
-
-    const body = {
-      mood,
-      range,
-      budget,
-      ingredients,
-      genre
-    };
-
-    try {
-      const response = await fetch('/api/gpt', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'application/json'
-        },
-        body: JSON.stringify(body)
-      });
-
-      const data = await response.json();
-
-      if (data.error) {
-        resultBox.textContent = 'エラー: ' + data.error.message;
-      } else {
-        resultBox.textContent = data.result;
-      }
-    } catch (error) {
-      resultBox.textContent = 'エラーが発生しました：' + error.message;
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ごはんGPT</title>
+  <style>
+    body {
+      font-family: "Hiragino Kaku Gothic ProN", sans-serif;
+      padding: 20px;
+      max-width: 600px;
+      margin: auto;
+      background-color: #fefefe;
+      color: #333;
     }
-  });
-</script>
+    h1 {
+      text-align: center;
+      font-size: 1.8em;
+      margin-bottom: 30px;
+      color: #2c3e50;
+    }
+    form {
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+    label {
+      margin-bottom: 10px;
+      font-weight: bold;
+      display: block;
+    }
+    select, input, button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      font-size: 1em;
+    }
+    button {
+      background-color: #2ecc71;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #27ae60;
+    }
+    .result {
+      margin-top: 30px;
+      padding: 20px;
+      border: 1px solid #ddd;
+      border-radius: 10px;
+      background-color: #fafafa;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <h1>🍱 ごはんGPT</h1>
+  <form id="gohanForm">
+    <label>気分</label>
+    <select id="mood">
+      <option>疲れてる</option>
+      <option>リフレッシュしたい</option>
+      <option>ガッツリ</option>
+      <option>サッパリ</option>
+      <option>特に決まってない</option>
+    </select>
+
+    <label>動ける範囲</label>
+    <select id="range">
+      <option>家から出たくない</option>
+      <option>出てもいい</option>
+      <option>外で食べたい</option>
+    </select>
+
+    <label>予算</label>
+    <select id="budget">
+      <option>〜500円</option>
+      <option>〜1,000円</option>
+      <option>あまり気にしない</option>
+    </select>
+
+    <label>所持食材（任意）</label>
+    <input type="text" id="ingredients" placeholder="例：卵、冷凍うどん、ネギ">
+
+    <label>ジャンル（任意）</label>
+    <input type="text" id="genre" placeholder="和食／中華など">
+
+    <button type="submit">提案して！</button>
+  </form>
+
+  <div class="result" id="result"></div>
+
+  <script>
+    const form = document.getElementById('gohanForm');
+    const resultBox = document.getElementById('result');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      resultBox.textContent = '提案を生成中...';
+
+      const mood = document.getElementById('mood').value;
+      const range = document.getElementById('range').value;
+      const budget = document.getElementById('budget').value;
+      const ingredients = document.getElementById('ingredients').value;
+      const genre = document.getElementById('genre').value;
+
+      const body = {
+        mood,
+        range,
+        budget,
+        ingredients,
+        genre
+      };
+
+      try {
+        const response = await fetch('/api/gpt', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+          },
+          body: JSON.stringify(body)
+        });
+
+        const data = await response.json();
+
+        if (data.error) {
+          resultBox.textContent = 'エラー: ' + data.error.message;
+        } else {
+          resultBox.textContent = data.result;
+        }
+      } catch (error) {
+        resultBox.textContent = 'エラーが発生しました：' + error.message;
+      }
+    });
+  </script>
+</body>
+</html>
