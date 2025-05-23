@@ -1,3 +1,5 @@
+// File: /api/gpt.js (Improved error logging and response check)
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -17,7 +19,6 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Prompt is required' });
   }
 
-  // ここでログ出力して検証
   console.log("OPENAI_API_KEY:", process.env.OPENAI_API_KEY);
 
   try {
@@ -35,6 +36,12 @@ export default async function handler(req, res) {
     });
 
     const data = await openaiRes.json();
+    console.log("OpenAI response:", JSON.stringify(data, null, 2));
+
+    if (!data.choices || !data.choices[0]) {
+      return res.status(500).json({ error: 'OpenAI returned no choices', fullResponse: data });
+    }
+
     res.status(200).json({ result: data.choices[0].message.content });
   } catch (err) {
     console.error('OpenAI fetch failed:', err);
