@@ -133,14 +133,16 @@
         if (data.error) {
           choicesBox.textContent = 'エラー: ' + data.error.message;
         } else {
-          const options = data.result.split(/\n\s*\d+\. /).filter(s => s.trim());
+          const raw = data.result.replace(/^### 選択肢一覧\n?/i, '');
+          const options = raw.split(/\n\s*\d+\. /).filter(s => s.trim());
           choicesBox.innerHTML = '<strong>以下から気になるメニューを選んでください：</strong>';
           options.forEach((opt, index) => {
+            const cleaned = opt.replace(/^■\s*/, '').replace(/\n■\s*([0-9]+分)/, '\n■ 調理時間：$1');
             const btn = document.createElement('div');
             btn.className = 'choice-btn';
-            btn.textContent = `${index + 1}. ${opt}`;
+            btn.textContent = `${index + 1}. ${cleaned}`;
             btn.addEventListener('click', () => {
-              resultBox.textContent = `${index + 1}番を選びました：\n\n${opt}`;
+              resultBox.textContent = `${index + 1}番を選びました：\n\n${cleaned}`;
             });
             choicesBox.appendChild(btn);
           });
