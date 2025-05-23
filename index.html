@@ -6,24 +6,19 @@
   <title>ごはんGPT</title>
   <style>
     body {
-      font-family: "Hiragino Kaku Gothic ProN", sans-serif;
+      font-family: sans-serif;
       padding: 20px;
       max-width: 600px;
       margin: auto;
       background-color: #fefefe;
       color: #333;
     }
-    h1 {
-      text-align: center;
-      font-size: 1.8em;
-      margin-bottom: 30px;
-      color: #2c3e50;
-    }
-    form {
-      background: #ffffff;
+    form, .choices, .result {
+      background: #fff;
       padding: 20px;
       border-radius: 10px;
       box-shadow: 0 0 10px rgba(0,0,0,0.05);
+      margin-bottom: 20px;
     }
     label {
       margin-bottom: 10px;
@@ -47,12 +42,18 @@
     button:hover {
       background-color: #27ae60;
     }
+    .choice-btn {
+      margin: 5px 0;
+      padding: 10px;
+      background-color: #f4f4f4;
+      border-radius: 5px;
+      cursor: pointer;
+      border: 1px solid #ccc;
+    }
+    .choice-btn:hover {
+      background-color: #e0e0e0;
+    }
     .result {
-      margin-top: 30px;
-      padding: 20px;
-      border: 1px solid #ddd;
-      border-radius: 10px;
-      background-color: #fafafa;
       white-space: pre-wrap;
     }
   </style>
@@ -92,15 +93,18 @@
     <button type="submit">提案して！</button>
   </form>
 
+  <div class="choices" id="choices"></div>
   <div class="result" id="result"></div>
 
   <script>
     const form = document.getElementById('gohanForm');
     const resultBox = document.getElementById('result');
+    const choicesBox = document.getElementById('choices');
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      resultBox.textContent = '提案を生成中...';
+      resultBox.textContent = '';
+      choicesBox.innerHTML = '提案を生成中...';
 
       const mood = document.getElementById('mood').value;
       const range = document.getElementById('range').value;
@@ -108,13 +112,7 @@
       const ingredients = document.getElementById('ingredients').value;
       const genre = document.getElementById('genre').value;
 
-      const body = {
-        mood,
-        range,
-        budget,
-        ingredients,
-        genre
-      };
+      const body = { mood, range, budget, ingredients, genre };
 
       try {
         const response = await fetch('/api/gpt', {
@@ -129,12 +127,22 @@
         const data = await response.json();
 
         if (data.error) {
-          resultBox.textContent = 'エラー: ' + data.error.message;
+          choicesBox.textContent = 'エラー: ' + data.error.message;
         } else {
-          resultBox.textContent = data.result;
+          const options = data.result.split(/\n\s*\d+\. /).filter(s => s.trim());
+          choicesBox.innerHTML = '<strong>以下から気になるメニューを選んでください：</strong>';
+          options.forEach((opt, index) => {
+            const btn = document.createElement('div');
+            btn.className = 'choice-btn';
+            btn.textContent = `${index + 1}. ${opt}`;
+            btn.addEventListener('click', () => {
+              resultBox.textContent = `${index + 1}番を選びました：\n\n${opt}`;
+            });
+            choicesBox.appendChild(btn);
+          });
         }
       } catch (error) {
-        resultBox.textContent = 'エラーが発生しました：' + error.message;
+        choicesBox.textContent = 'エラーが発生しました：' + error.message;
       }
     });
   </script>
