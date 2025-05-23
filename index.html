@@ -1,161 +1,77 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ごはんGPT</title>
-  <style>
-    body {
-      font-family: "Hiragino Kaku Gothic ProN", sans-serif;
-      padding: 20px;
-      max-width: 700px;
-      margin: auto;
-      background-color: #f9f9f9;
-      color: #333;
-    }
-    form, .choices, .result {
-      background: #fff;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      margin-bottom: 24px;
-    }
-    label {
-      margin-bottom: 8px;
-      font-weight: bold;
-      display: block;
-    }
-    select, input, button {
-      width: 100%;
-      padding: 12px;
-      margin-bottom: 16px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: 1em;
-    }
-    button {
-      background-color: #2ecc71;
-      color: white;
-      border: none;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    button:hover {
-      background-color: #27ae60;
-    }
-    .choice-btn {
-      margin: 8px 0;
-      padding: 14px 16px;
-      background-color: #fdfdfd;
-      border-left: 5px solid #2ecc71;
-      border-radius: 8px;
-      cursor: pointer;
-      border: 1px solid #ddd;
-      transition: all 0.2s;
-      white-space: pre-line;
-    }
-    .choice-btn:hover {
-      background-color: #f0fdf4;
-    }
-    .result {
-      white-space: pre-line;
-    }
-  </style>
-</head>
-<body>
-  <h1>🍱 ごはんGPT</h1>
-  <form id="gohanForm">
-    <label>気分</label>
-    <select id="mood">
-      <option>疲れてる</option>
-      <option>リフレッシュしたい</option>
-      <option>ガッツリ</option>
-      <option>サッパリ</option>
-      <option>特に決まってない</option>
-    </select>
+<script>
+  const form = document.getElementById('gohanForm');
+  const resultBox = document.getElementById('result');
+  const choicesBox = document.getElementById('choices');
 
-    <label>動ける範囲</label>
-    <select id="range">
-      <option>家から出たくない</option>
-      <option>出てもいい</option>
-      <option>外で食べたい</option>
-    </select>
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    resultBox.textContent = '';
+    choicesBox.innerHTML = '提案を生成中...';
 
-    <label>予算</label>
-    <select id="budget">
-      <option>〜500円</option>
-      <option>〜1,000円</option>
-      <option>あまり気にしない</option>
-    </select>
+    const mood = document.getElementById('mood').value;
+    const range = document.getElementById('range').value;
+    const budget = document.getElementById('budget').value;
+    const ingredients = document.getElementById('ingredients').value;
+    const genre = document.getElementById('genre').value;
 
-    <label>所持食材（任意）</label>
-    <input type="text" id="ingredients" placeholder="例：卵、冷凍うどん、ネギ" />
+    const body = { mood, range, budget, ingredients, genre };
 
-    <label>ジャンル（任意）</label>
-    <input type="text" id="genre" placeholder="和食／中華など" />
+    try {
+      const response = await fetch('/api/gpt', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify(body)
+      });
 
-    <button type="submit">提案して！</button>
-  </form>
+      const data = await response.json();
 
-  <div class="choices" id="choices"></div>
-  <div class="result" id="result"></div>
+      if (data.error) {
+        choicesBox.textContent = 'エラー: ' + data.error.message;
+      } else {
+        const raw = data.result.replace(/#+ 選択肢一覧\s*/i, '');
+        const options = raw.split(/\n\s*\d+\.\s*/).filter(s => s.trim());
 
-  <script>
-    const form = document.getElementById('gohanForm');
-    const resultBox = document.getElementById('result');
-    const choicesBox = document.getElementById('choices');
+        choicesBox.innerHTML = '<strong>以下から気になるメニューを選んでください：</strong>';
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      resultBox.textContent = '';
-      choicesBox.innerHTML = '提案を生成中...';
+        options.forEach((opt, index) => {
+          const cleaned = opt
+            .replace(/^■\s*/, '')
+            .replace(/\n■\s*([0-9]+分)/, '\n■ 調理時間：$1');
 
-      const mood = document.getElementById('mood').value;
-      const range = document.getElementById('range').value;
-      const budget = document.getElementById('budget').value;
-      const ingredients = document.getElementById('ingredients').value;
-      const genre = document.getElementById('genre').value;
+          const btn = document.createElement('div');
+          btn.className = 'choice-btn';
+          btn.textContent = `${index + 1}. ${cleaned}`;
 
-      const body = { mood, range, budget, ingredients, genre };
+          btn.addEventListener('click', async () => {
+            resultBox.textContent = '詳細レシピを生成中...';
+            const selectedTitle = cleaned.split('\n')[0].replace(/^■\s*/, '').trim();
+            const prompt = `次のメニュー「${selectedTitle}」の詳細レシピを提案してください。必要な材料と具体的な手順を5ステップ以内で簡潔に出力してください。`;
 
-      try {
-        const response = await fetch('/api/gpt', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-          },
-          body: JSON.stringify(body)
-        });
+            try {
+              const detailRes = await fetch('/api/gpt', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Accept': 'application/json'
+                },
+                body: JSON.stringify({ prompt })
+              });
 
-        const data = await response.json();
-
-        if (data.error) {
-          choicesBox.textContent = 'エラー: ' + data.error.message;
-        } else {
-          // 修正ポイント：### 選択肢一覧 の削除を厳密に処理
-          const raw = data.result.replace(/#+ 選択肢一覧\s*/i, '');
-          const options = raw.split(/\n\s*\d+\.\s*/).filter(s => s.trim());
-
-          choicesBox.innerHTML = '<strong>以下から気になるメニューを選んでください：</strong>';
-          options.forEach((opt, index) => {
-            const cleaned = opt
-              .replace(/^■\s*/, '')
-              .replace(/\n■\s*([0-9]+分)/, '\n■ 調理時間：$1');
-
-            const btn = document.createElement('div');
-            btn.className = 'choice-btn';
-            btn.textContent = `${index + 1}. ${cleaned}`;
-            btn.addEventListener('click', () => {
-              resultBox.textContent = `${index + 1}番を選びました：\n\n${cleaned}`;
-            });
-            choicesBox.appendChild(btn);
+              const detailData = await detailRes.json();
+              resultBox.textContent = detailData.result || 'レシピ生成に失敗しました';
+            } catch (error) {
+              resultBox.textContent = '詳細レシピの取得中にエラーが発生しました：' + error.message;
+            }
           });
-        }
-      } catch (error) {
-        choicesBox.textContent = 'エラーが発生しました：' + error.message;
+
+          choicesBox.appendChild(btn);
+        });
       }
-    });
-  </script>
-</body>
-</html>
+    } catch (error) {
+      choicesBox.textContent = 'エラーが発生しました：' + error.message;
+    }
+  });
+</script>
