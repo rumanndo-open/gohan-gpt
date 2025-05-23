@@ -1,4 +1,5 @@
 // File: /api/gpt.js (Improved error logging and response check)
+// trigger redeploy for OpenAI quota reset
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
