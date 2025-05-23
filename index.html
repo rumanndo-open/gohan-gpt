@@ -133,8 +133,10 @@
         if (data.error) {
           choicesBox.textContent = 'エラー: ' + data.error.message;
         } else {
-          const raw = data.result.replace(/^### 選択肢一覧\n?/i, '');
-          const options = raw.split(/\n\s*\d+\. /).filter(s => s.trim());
+          // 修正ポイント：### 選択肢一覧 の削除を厳密に処理
+          const raw = data.result.replace(/#+ 選択肢一覧\s*/i, '');
+          const options = raw.split(/\n\s*\d+\.\s*/).filter(s => s.trim());
+
           choicesBox.innerHTML = '<strong>以下から気になるメニューを選んでください：</strong>';
           options.forEach((opt, index) => {
             const cleaned = opt
