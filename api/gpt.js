@@ -1,5 +1,5 @@
-// File: /api/gpt.js (Dynamic prompt by range/self-cook split)
-// trigger redeploy for OpenAI prompt split
+// File: /api/gpt.js (Dynamic prompt with 10-option self-cook mode only)
+// trigger redeploy for refined self-cook options
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -23,17 +23,10 @@ export default async function handler(req, res) {
 
   let prompt = '';
 
-  if (range === '外で食べたい') {
-    // 外食プロンプト
-    prompt = `あなたは飲食店アドバイザーです。以下の条件に基づき、現実的な外食の提案をしてください：\n\n` +
-      `【気分】：${mood}\n【予算】：${budget}\n【ジャンル】：${genre || '指定なし'}\n` +
-      `\n【指示】：\n・500円以下でラーメンなど非現実的な提案は避ける\n・全国チェーンや定番の業態でコスパ・満足度重視の提案を\n\n【出力形式】：\n■ 提案タイプ（外食）\n■ 店名 / メニュー名\n■ 所要時間（目安）\n■ 理由\n■ アドバイス`;
-  } else {
-    // 自炊プロンプト
-    prompt = `あなたは家庭料理のアドバイザーです。以下の条件に基づき、疲れていても作れる自炊メニューを提案してください：\n\n` +
-      `【気分】：${mood}\n【予算】：${budget}\n【所持食材】：${ingredients || '特になし'}\n【ジャンル】：${genre || '指定なし'}\n` +
-      `\n【指示】：\n・調理時間15分以内\n・洗い物が少なく簡単に作れること\n・指定された食材内で作れる料理を\n\n【出力形式】：\n■ 提案タイプ（自炊）\n■ メニュー名\n■ 所要時間 / 難易度\n■ 調理手順（簡潔に）\n■ 理由\n■ アドバイス`;
-  }
+  // 自炊プロンプト（選択肢10個、後で選択して展開）
+  prompt = `あなたは家庭料理のアドバイザーです。以下の条件に基づき、ユーザーが選べるように簡単な自炊メニューを10個提示してください：\n\n` +
+    `【気分】：${mood}\n【予算】：${budget}\n【所持食材】：${ingredients || '特になし'}\n【ジャンル】：${genre || '指定なし'}\n` +
+    `\n【指示】：\n・各提案は15分以内で調理可能なものにしてください。\n・調理工程がシンプルで疲れていても対応できる内容を選んでください。\n・各提案には以下の情報を含めてください：\n  - メニュー名\n  - 所要時間\n  - 難易度（★〜★★★）\n  - 概要（どんな料理かの説明）\n\n【出力形式】：\n### 選択肢一覧\n1. ■ メニュー名\n   ■ 所要時間 / 難易度\n   ■ 概要\n...（10個）`;
 
   try {
     const openaiRes = await fetch('https://api.openai.com/v1/chat/completions', {
