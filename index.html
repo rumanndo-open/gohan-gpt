@@ -40,4 +40,68 @@
       color: white;
       border: none;
       padding: 12px 20px;
-      font-size:
+      font-size: 1rem;
+      border-radius: 10px;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+    button:hover {
+      background-color: #e76f51;
+    }
+    .card {
+      margin-top: 30px;
+      background-color: #fefae0;
+      border-radius: 15px;
+      padding: 20px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    }
+    .card h2 {
+      margin-top: 0;
+    }
+    .close-btn {
+      float: right;
+      background: none;
+      border: none;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: #666;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>ごはんGPT 🍚</h1>
+    <label>
+      <input type="checkbox" id="nutritionCheck">
+      栄養を気にする
+    </label>
+    <button onclick="suggestMeal()">献立を提案</button>
+
+    <div id="resultCard" class="card" style="display: none;">
+      <button class="close-btn" onclick="closeCard()">×</button>
+      <h2>今日のおすすめメニュー</h2>
+      <p id="mealResult">...</p>
+    </div>
+  </div>
+
+  <script>
+    function suggestMeal() {
+      const check = document.getElementById('nutritionCheck').checked;
+      const result = document.getElementById('mealResult');
+      const card = document.getElementById('resultCard');
+
+      if (check) {
+        result.innerText = "バランス良好：鶏むね肉のソテー、玄米ごはん、ほうれん草の味噌汁、副菜にひじき煮";
+      } else {
+        result.innerText = "スピード献立：チャーハン、中華スープ、冷ややっこ";
+      }
+
+      card.style.display = 'block';
+    }
+
+    function closeCard() {
+      document.getElementById('resultCard').style.display = 'none';
+    }
+  </script>
+</body>
+</html>
