@@ -25,7 +25,7 @@
       font-weight: bold;
       display: block;
     }
-    select, input, button {
+    select, input[type="text"], button {
       width: 100%;
       padding: 12px;
       margin-bottom: 16px;
@@ -79,6 +79,21 @@
       font-size: 1.2em;
       cursor: pointer;
     }
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 12px;
+      font-weight: bold;
+      font-size: 1em;
+      cursor: pointer;
+    }
+    .checkbox-label input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: #2ecc71;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -113,7 +128,7 @@
     <label>ジャンル（任意）</label>
     <input type="text" id="genre" placeholder="和食／中華など" />
 
-    <label>
+    <label class="checkbox-label">
       <input type="checkbox" id="nutrition" />
       栄養バランスも考慮する
     </label>
