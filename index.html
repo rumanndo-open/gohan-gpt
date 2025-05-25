@@ -113,6 +113,11 @@
     <label>ジャンル（任意）</label>
     <input type="text" id="genre" placeholder="和食／中華など" />
 
+    <label>
+      <input type="checkbox" id="nutrition" />
+      栄養バランスも考慮する
+    </label>
+
     <button type="submit">提案して！</button>
   </form>
 
@@ -131,7 +136,8 @@
         range: document.getElementById('range').value,
         budget: document.getElementById('budget').value,
         ingredients: document.getElementById('ingredients').value,
-        genre: document.getElementById('genre').value
+        genre: document.getElementById('genre').value,
+        nutrition: document.getElementById('nutrition').checked
       };
 
       try {
