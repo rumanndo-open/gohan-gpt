@@ -1,107 +1,238 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <title>ごはんGPT</title>
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <!-- Google Fonts: Zen Maru Gothic -->
-  <link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic&display=swap" rel="stylesheet">
+  <title>ごはんGPT</title>
   <style>
     body {
-      font-family: 'Zen Maru Gothic', sans-serif;
-      background-color: #fffdf7;
-      margin: 0;
+      background-color: #fdf6ef;
+      font-family: "Hiragino Kaku Gothic ProN", sans-serif;
       padding: 20px;
+      margin: 0;
       color: #333;
+    }
+    .container {
+      max-width: 520px;
+      margin: auto;
+      background: #fff;
+      border-radius: 20px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.05);
+      padding: 24px;
     }
     h1 {
       text-align: center;
-      margin-bottom: 30px;
-      font-size: 2rem;
+      font-size: 1.8em;
+      color: #2f4f4f;
+      margin-bottom: 24px;
     }
-    .container {
-      max-width: 600px;
-      margin: auto;
-      background-color: #fff;
-      border-radius: 20px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-      padding: 30px;
+    .form-group {
+      margin-bottom: 16px;
     }
     label {
+      font-weight: bold;
       display: block;
-      margin-bottom: 10px;
-      font-size: 1rem;
+      margin-bottom: 6px;
+      color: #2f4f4f;
     }
-    input[type="checkbox"] {
-      margin-right: 10px;
+    select, input[type="text"] {
+      width: 100%;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid #ccc;
+      font-size: 1em;
+      background-color: #fff;
+    }
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 14px;
+      font-weight: bold;
+      font-size: 1em;
+      color: #2f4f4f;
+    }
+    .checkbox-label input[type="checkbox"] {
+      width: 22px;
+      height: 22px;
+      accent-color: #34c38f;
     }
     button {
-      background-color: #f4a261;
+      width: 100%;
+      padding: 14px;
+      font-size: 1em;
+      background-color: #34c38f;
       color: white;
       border: none;
-      padding: 12px 20px;
-      font-size: 1rem;
-      border-radius: 10px;
+      border-radius: 14px;
+      font-weight: bold;
       cursor: pointer;
       margin-top: 20px;
     }
     button:hover {
-      background-color: #e76f51;
+      background-color: #2daa77;
+    }
+    .logo {
+      width: 64px;
+      margin: 0 auto 16px;
+      display: block;
     }
     .card {
-      margin-top: 30px;
-      background-color: #fefae0;
-      border-radius: 15px;
-      padding: 20px;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      padding: 16px;
+      margin-bottom: 12px;
+      cursor: pointer;
+      transition: background 0.2s;
     }
-    .card h2 {
-      margin-top: 0;
+    .card:hover {
+      background: #f4f9f6;
+    }
+    .card-title {
+      font-weight: bold;
+      margin-bottom: 4px;
+      color: #2f4f4f;
+    }
+    .detail {
+      margin-top: 10px;
+      padding: 10px;
+      background: #f9f9f9;
+      border-radius: 12px;
+      font-size: 0.95em;
+      display: none;
+      white-space: pre-line;
     }
     .close-btn {
       float: right;
-      background: none;
+      background: transparent;
       border: none;
-      font-size: 1.2rem;
+      font-size: 1.2em;
+      color: #888;
       cursor: pointer;
-      color: #666;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>ごはんGPT 🍚</h1>
-    <label>
-      <input type="checkbox" id="nutritionCheck">
-      栄養を気にする
-    </label>
-    <button onclick="suggestMeal()">献立を提案</button>
+    <img src="https://em-content.zobj.net/thumbs/240/apple/354/bento-box_1f371.png" alt="logo" class="logo">
+    <h1>ごはんGPT</h1>
+    <form id="gohanForm">
+      <div class="form-group">
+        <label for="mood">気分</label>
+        <select id="mood">
+          <option>疲れてる</option>
+          <option>リフレッシュしたい</option>
+          <option>ガッツリ</option>
+          <option>サッパリ</option>
+          <option>特に決まってない</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="range">動ける範囲</label>
+        <select id="range">
+          <option>家から出たくない</option>
+          <option>出てもいい</option>
+          <option>外で食べたい</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="budget">予算</label>
+        <select id="budget">
+          <option>〜500円</option>
+          <option>〜1,000円</option>
+          <option>あまり気にしない</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="ingredients">所持食材（任意）</label>
+        <input type="text" id="ingredients" placeholder="例：卵、冷凍うどん、ネギ" />
+      </div>
+      <div class="form-group">
+        <label for="genre">ジャンル（任意）</label>
+        <input type="text" id="genre" placeholder="和食／中華など" />
+      </div>
+      <label class="checkbox-label">
+        <input type="checkbox" id="nutrition" />
+        栄養バランスも考慮する
+      </label>
+      <button type="submit">提案して！</button>
+    </form>
 
-    <div id="resultCard" class="card" style="display: none;">
-      <button class="close-btn" onclick="closeCard()">×</button>
-      <h2>今日のおすすめメニュー</h2>
-      <p id="mealResult">...</p>
-    </div>
+    <div id="choices" style="margin-top: 24px;"></div>
   </div>
 
   <script>
-    function suggestMeal() {
-      const check = document.getElementById('nutritionCheck').checked;
-      const result = document.getElementById('mealResult');
-      const card = document.getElementById('resultCard');
+    const form = document.getElementById('gohanForm');
+    const choicesBox = document.getElementById('choices');
 
-      if (check) {
-        result.innerText = "バランス良好：鶏むね肉のソテー、玄米ごはん、ほうれん草の味噌汁、副菜にひじき煮";
-      } else {
-        result.innerText = "スピード献立：チャーハン、中華スープ、冷ややっこ";
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      choicesBox.innerHTML = '提案を生成中...';
+
+      const body = {
+        mood: document.getElementById('mood').value,
+        range: document.getElementById('range').value,
+        budget: document.getElementById('budget').value,
+        ingredients: document.getElementById('ingredients').value,
+        genre: document.getElementById('genre').value,
+        nutrition: document.getElementById('nutrition').checked
+      };
+
+      try {
+        const response = await fetch('/api/gpt', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+
+        const data = await response.json();
+        if (data.error) {
+          choicesBox.textContent = 'エラー: ' + data.error.message;
+          return;
+        }
+
+        const raw = data.result.replace(/#+ 選択肢一覧\s*/i, '');
+        const options = raw.split(/\n\s*\d+\.\s*/).filter(s => s.trim());
+
+        choicesBox.innerHTML = '<h3>おすすめメニュー</h3>';
+
+        options.forEach((opt, index) => {
+          const cleaned = opt.replace(/^■\s*/, '').replace(/\n■\s*([0-9]+分)/, '\n■ 調理時間：$1');
+          const card = document.createElement('div');
+          card.className = 'card';
+          card.innerHTML = `<div class="card-title">${index + 1}. ${cleaned.split('\n')[0]}</div>`;
+
+          const detail = document.createElement('div');
+          detail.className = 'detail';
+          detail.textContent = 'レシピ生成中...';
+
+          card.appendChild(detail);
+          card.addEventListener('click', async () => {
+            if (detail.style.display === 'block') {
+              detail.style.display = 'none';
+              return;
+            }
+            detail.style.display = 'block';
+            const prompt = `次のメニュー「${cleaned.split('\n')[0]}」の詳細レシピを提案してください。材料と手順を5ステップ以内で簡潔に出力。`;
+            try {
+              const res = await fetch('/api/gpt', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ prompt })
+              });
+              const json = await res.json();
+              detail.textContent = json.result || 'レシピ取得失敗';
+            } catch {
+              detail.textContent = 'エラー発生';
+            }
+          });
+
+          choicesBox.appendChild(card);
+        });
+      } catch (err) {
+        choicesBox.textContent = 'エラーが発生しました：' + err.message;
       }
-
-      card.style.display = 'block';
-    }
-
-    function closeCard() {
-      document.getElementById('resultCard').style.display = 'none';
-    }
+    });
   </script>
 </body>
-</html>
