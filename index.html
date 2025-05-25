@@ -13,7 +13,7 @@
       background-color: #f9f9f9;
       color: #333;
     }
-    form, .choices, .result {
+    form, .choices {
       background: #fff;
       padding: 20px;
       border-radius: 12px;
@@ -53,12 +53,31 @@
       border: 1px solid #ddd;
       transition: all 0.2s;
       white-space: pre-line;
+      position: relative;
     }
     .choice-btn:hover {
       background-color: #f0fdf4;
     }
-    .result {
+    .detail-box {
+      margin-top: 12px;
+      padding: 12px;
+      background: #fefefe;
+      border: 1px solid #ccc;
+      border-radius: 6px;
       white-space: pre-line;
+      font-size: 0.95em;
+      color: #333;
+      position: relative;
+    }
+    .close-btn {
+      position: absolute;
+      top: 6px;
+      right: 8px;
+      border: none;
+      background: transparent;
+      color: #888;
+      font-size: 1.2em;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -98,25 +117,22 @@
   </form>
 
   <div class="choices" id="choices"></div>
-  <div class="result" id="result"></div>
 
   <script>
     const form = document.getElementById('gohanForm');
-    const resultBox = document.getElementById('result');
     const choicesBox = document.getElementById('choices');
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
-      resultBox.textContent = '';
       choicesBox.innerHTML = '提案を生成中...';
 
-      const mood = document.getElementById('mood').value;
-      const range = document.getElementById('range').value;
-      const budget = document.getElementById('budget').value;
-      const ingredients = document.getElementById('ingredients').value;
-      const genre = document.getElementById('genre').value;
-
-      const body = { mood, range, budget, ingredients, genre };
+      const body = {
+        mood: document.getElementById('mood').value,
+        range: document.getElementById('range').value,
+        budget: document.getElementById('budget').value,
+        ingredients: document.getElementById('ingredients').value,
+        genre: document.getElementById('genre').value
+      };
 
       try {
         const response = await fetch('/api/gpt', {
@@ -132,46 +148,70 @@
 
         if (data.error) {
           choicesBox.textContent = 'エラー: ' + data.error.message;
-        } else {
-          const raw = data.result.replace(/#+ 選択肢一覧\s*/i, '');
-          const options = raw.split(/\n\s*\d+\.\s*/).filter(s => s.trim());
-
-          choicesBox.innerHTML = '<strong>以下から気になるメニューを選んでください：</strong>';
-
-          options.forEach((opt, index) => {
-            const cleaned = opt
-              .replace(/^■\s*/, '')
-              .replace(/\n■\s*([0-9]+分)/, '\n■ 調理時間：$1');
-
-            const btn = document.createElement('div');
-            btn.className = 'choice-btn';
-            btn.textContent = `${index + 1}. ${cleaned}`;
-
-            btn.addEventListener('click', async () => {
-              resultBox.textContent = '詳細レシピを生成中...';
-              const selectedTitle = cleaned.split('\n')[0].replace(/^■\s*/, '').trim();
-              const prompt = `次のメニュー「${selectedTitle}」の詳細レシピを提案してください。必要な材料と具体的な手順を5ステップ以内で簡潔に出力してください。`;
-
-              try {
-                const detailRes = await fetch('/api/gpt', {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                  },
-                  body: JSON.stringify({ prompt })
-                });
-
-                const detailData = await detailRes.json();
-                resultBox.textContent = detailData.result || 'レシピ生成に失敗しました';
-              } catch (error) {
-                resultBox.textContent = '詳細レシピの取得中にエラーが発生しました：' + error.message;
-              }
-            });
-
-            choicesBox.appendChild(btn);
-          });
+          return;
         }
+
+        const raw = data.result.replace(/#+ 選択肢一覧\s*/i, '');
+        const options = raw.split(/\n\s*\d+\.\s*/).filter(s => s.trim());
+
+        choicesBox.innerHTML = '<strong>以下から気になるメニューを選んでください：</strong>';
+
+        options.forEach((opt, index) => {
+          const cleaned = opt
+            .replace(/^■\s*/, '')
+            .replace(/\n■\s*([0-9]+分)/, '\n■ 調理時間：$1');
+
+          const btn = document.createElement('div');
+          btn.className = 'choice-btn';
+          btn.textContent = `${index + 1}. ${cleaned}`;
+
+          const detailDiv = document.createElement('div');
+          detailDiv.className = 'detail-box';
+          detailDiv.style.display = 'none';
+
+          const closeBtn = document.createElement('button');
+          closeBtn.className = 'close-btn';
+          closeBtn.textContent = '✕';
+          closeBtn.onclick = (event) => {
+            event.stopPropagation();
+            detailDiv.style.display = 'none';
+          };
+
+          detailDiv.appendChild(closeBtn);
+          btn.appendChild(detailDiv);
+
+          btn.addEventListener('click', async () => {
+            detailDiv.innerHTML = '';
+            detailDiv.appendChild(closeBtn);
+            detailDiv.style.display = 'block';
+            detailDiv.append('詳細レシピを生成中...');
+
+            const selectedTitle = cleaned.split('\n')[0].replace(/^■\s*/, '').trim();
+            const prompt = `次のメニュー「${selectedTitle}」の詳細レシピを提案してください。必要な材料と具体的な手順を5ステップ以内で簡潔に出力してください。`;
+
+            try {
+              const detailRes = await fetch('/api/gpt', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Accept': 'application/json'
+                },
+                body: JSON.stringify({ prompt })
+              });
+
+              const detailData = await detailRes.json();
+              detailDiv.innerHTML = '';
+              detailDiv.appendChild(closeBtn);
+              detailDiv.append(detailData.result || 'レシピ生成に失敗しました');
+            } catch (error) {
+              detailDiv.innerHTML = '';
+              detailDiv.appendChild(closeBtn);
+              detailDiv.append('エラー: ' + error.message);
+            }
+          });
+
+          choicesBox.appendChild(btn);
+        });
       } catch (error) {
         choicesBox.textContent = 'エラーが発生しました：' + error.message;
       }
