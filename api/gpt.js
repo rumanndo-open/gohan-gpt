@@ -1,5 +1,4 @@
 import { OpenAI } from 'openai';
-
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export default async function handler(req, res) {
@@ -7,24 +6,16 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const {
-    mood,
-    range,
-    budget,
-    ingredients,
-    genre,
-    prompt
-  } = req.body;
-
+  const { mood, range, budget, ingredients, genre, nutrition, prompt } = req.body;
   let finalPrompt = '';
 
-  // ❶ 直接 prompt 指定があれば優先（レシピ詳細生成用）
   if (prompt) {
     finalPrompt = prompt;
   } else {
-    // ❷ 通常の自炊／外食提案プロンプトを構築
+    const nutritionNote = nutrition ? '栄養バランスを考慮した' : 'シンプルで家庭で作りやすい';
+
     if (range === '外で食べたい') {
-      finalPrompt = `あなたは飲食店アドバイザーです。以下の条件に基づき、現実的で実行可能な「外食」の提案をしてください。
+      finalPrompt = `あなたは飲食店アドバイザーです。以下の条件に基づき、${nutritionNote}外食メニューを提案してください。
 
 【条件】
 - 気分：${mood}
@@ -32,9 +23,8 @@ export default async function handler(req, res) {
 - エリア情報：不明（全国チェーンを想定）
 
 【指示】
-- 非現実的な価格設定（例：500円でラーメン）を避けてください。
-- 実際に全国チェーンなどで注文できそうな食事と店舗名を提案してください。
-- 移動や価格を考慮し、手軽さ・満足度を重視してください。
+- 実際に注文できる全国チェーンのメニューを前提
+- ${nutrition ? '主食・主菜・副菜のバランスを考えた構成にしてください。' : '手軽さやコスパを重視してください。'}
 
 【出力形式】
 ■ 提案タイプ（外食）
@@ -43,7 +33,7 @@ export default async function handler(req, res) {
 ■ 理由
 ■ アドバイス`;
     } else {
-      finalPrompt = `あなたは料理提案アドバイザーです。以下の条件に基づき、冷蔵庫にありそうな素材を活かした簡単な自炊メニューを10件提案してください。
+      finalPrompt = `あなたは料理提案アドバイザーです。以下の条件に基づいて、${nutritionNote}自炊メニューを10件提案してください。
 
 【条件】
 - 気分：${mood}
@@ -51,6 +41,9 @@ export default async function handler(req, res) {
 - 所持食材：${ingredients || '指定なし'}
 - 予算：${budget}
 - ジャンル：${genre || '指定なし'}
+
+【指示】
+- ${nutrition ? '栄養バランス（主食・主菜・副菜）を意識し、野菜を適度に含めてください。' : 'とにかく簡単で作りやすいものを中心にしてください。'}
 
 【出力形式】
 ### 選択肢一覧
@@ -69,7 +62,6 @@ export default async function handler(req, res) {
     });
 
     const reply = chatCompletion.choices?.[0]?.message?.content;
-
     res.status(200).json({ result: reply });
   } catch (error) {
     console.error('OpenAI fetch failed:', error);
