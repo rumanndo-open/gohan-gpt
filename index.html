@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -20,7 +19,7 @@
       font-size: 1.5em;
     }
     main {
-      max-width: 600px;
+      max-width: 480px;
       margin: auto;
       padding: 20px;
     }
@@ -35,7 +34,7 @@
       margin-top: 10px;
       font-weight: bold;
     }
-    input, select {
+    input[type="text"], select {
       width: 100%;
       padding: 10px;
       margin-top: 4px;
@@ -43,6 +42,17 @@
       border: 1px solid #ccc;
       border-radius: 6px;
       font-size: 1em;
+      box-sizing: border-box;
+    }
+    .checkbox-container {
+      display: flex;
+      align-items: center;
+      margin-top: 10px;
+      margin-bottom: 20px;
+    }
+    .checkbox-container input[type="checkbox"] {
+      margin-right: 10px;
+      transform: scale(1.2);
     }
     button {
       width: 100%;
@@ -58,7 +68,7 @@
     button:hover {
       background: #27ae60;
     }
-    .choices, .result {
+    .choices {
       margin-top: 20px;
       background: white;
       padding: 16px;
@@ -78,37 +88,10 @@
     .choice-btn:hover {
       background: #d1fae5;
     }
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 100;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      overflow: auto;
-      background-color: rgba(0,0,0,0.5);
-    }
-    .modal-content {
-      background-color: white;
-      margin: 10% auto;
-      padding: 20px;
-      border-radius: 10px;
-      width: 80%;
-      max-width: 500px;
-      white-space: pre-line;
-    }
-    .close {
-      color: #aaa;
-      float: right;
-      font-size: 24px;
-      font-weight: bold;
-      cursor: pointer;
-    }
   </style>
 </head>
 <body>
-  <header>🍱 ごはんGPT</header>
+  <header>📚 ごはんGPT</header>
   <main>
     <form id="gohanForm">
       <label>気分</label>
@@ -135,34 +118,25 @@
       </select>
 
       <label>所持食材（任意）</label>
-      <input type="text" id="ingredients" placeholder="例：卵、冷凍うどん、ネギ"/>
+      <input type="text" id="ingredients" placeholder="例：卵、冷凍うどん、ネギ" />
 
       <label>ジャンル（任意）</label>
-      <input type="text" id="genre" placeholder="和食／中華など"/>
+      <input type="text" id="genre" placeholder="和食／中華など" />
 
-      <label>
+      <div class="checkbox-container">
         <input type="checkbox" id="nutrition" />
-        栄養バランスを気にする
-      </label>
+        <label for="nutrition" style="margin: 0;">栄養バランスを気にする</label>
+      </div>
 
       <button type="submit">提案して！</button>
     </form>
 
     <div class="choices" id="choices"></div>
-    <div id="modal" class="modal">
-      <div class="modal-content">
-        <span class="close" id="closeModal">&times;</span>
-        <div id="result"></div>
-      </div>
-    </div>
   </main>
 
   <script>
     const form = document.getElementById('gohanForm');
     const choicesBox = document.getElementById('choices');
-    const modal = document.getElementById('modal');
-    const closeModal = document.getElementById('closeModal');
-    const resultBox = document.getElementById('result');
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
@@ -174,7 +148,7 @@
         budget: document.getElementById('budget').value,
         ingredients: document.getElementById('ingredients').value,
         genre: document.getElementById('genre').value,
-        nutrition: document.getElementById('nutrition').checked
+        healthAware: document.getElementById('nutrition').checked
       };
 
       try {
@@ -190,31 +164,18 @@
           return;
         }
 
-        const options = data.result.replace(/^### 選択肢一覧
-?/i, '').split(/
-\s*\d+\.\s+/).filter(Boolean);
-        choicesBox.innerHTML = '<strong>以下から選択してください：</strong>';
+        const options = data.result.replace(/^### 選択肢一覧\n?/i, '').split(/\n\s*\d+\.\s+/).filter(Boolean);
+        choicesBox.innerHTML = '<strong>以下から選んでください：</strong>';
         options.forEach((text, i) => {
           const btn = document.createElement('div');
           btn.className = 'choice-btn';
           btn.textContent = `${i + 1}. ${text}`;
-          btn.onclick = () => {
-            resultBox.textContent = `${i + 1}番を選びました：
-
-${text}`;
-            modal.style.display = 'block';
-          };
           choicesBox.appendChild(btn);
         });
       } catch (err) {
         choicesBox.textContent = 'エラーが発生しました: ' + err.message;
       }
     });
-
-    closeModal.onclick = () => modal.style.display = 'none';
-    window.onclick = (e) => {
-      if (e.target === modal) modal.style.display = 'none';
-    };
   </script>
 </body>
 </html>
