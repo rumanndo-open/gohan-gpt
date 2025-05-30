@@ -1,5 +1,5 @@
 // api/gpt.js
-const { Configuration, OpenAIApi } = require("openai");
+const OpenAI = require("openai").default;
 
 module.exports = async function handler(req, res) {
   if (req.method !== "POST") {
@@ -12,11 +12,11 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: { message: "OpenAI API key not configured." } });
   }
 
-  const configuration = new Configuration({
+  const configuration = new OpenAI.Configuration({
     apiKey: process.env.OPENAI_API_KEY,
   });
 
-  const openai = new OpenAIApi(configuration);
+  const openai = new OpenAI.OpenAIApi(configuration);
 
   try {
     const systemMessage = `あなたは一人暮らし向けの食事提案アシスタントです。以下の条件をもとに、自炊メニューを10個提示してください。
