@@ -1,5 +1,5 @@
 // api/gpt.js
-const OpenAI = require("openai").default;
+const OpenAI = require("openai");
 
 module.exports = async function handler(req, res) {
   if (req.method !== "POST") {
@@ -12,11 +12,9 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: { message: "OpenAI API key not configured." } });
   }
 
-  const configuration = new OpenAI.Configuration({
+  const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
   });
-
-  const openai = new OpenAI.OpenAIApi(configuration);
 
   try {
     const systemMessage = `あなたは一人暮らし向けの食事提案アシスタントです。以下の条件をもとに、自炊メニューを10個提示してください。
@@ -30,7 +28,7 @@ ${nutrition === true ? "また、栄養バランスにも配慮してくださ�
 
     const userMessage = `気分: ${mood}, 範囲: ${range}, 予算: ${budget}, 食材: ${ingredients}, ジャンル: ${genre}`;
 
-    const completion = await openai.createChatCompletion({
+    const chatCompletion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages: [
         { role: "system", content: systemMessage },
@@ -39,8 +37,7 @@ ${nutrition === true ? "また、栄養バランスにも配慮してくださ�
       temperature: 0.8,
     });
 
-    const result = completion.data.choices[0].message.content;
-    res.status(200).json({ result });
+    res.status(200).json({ result: chatCompletion.choices[0].message.content });
   } catch (error) {
     console.error("OpenAI fetch failed:", error);
     res.status(500).json({
