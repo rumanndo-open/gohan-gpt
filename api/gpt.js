@@ -74,7 +74,7 @@ CSSで各メニューをタイル形式（カード風）に表示するには�
   ...（繰り返し）
 </div>
 
-CSSも併せて整形してください。
+CSSも併せて整形してください。"
 
   try {
     const chatCompletion = await openai.chat.completions.create({
@@ -95,4 +95,3 @@ CSSも併せて整形してください。
     res.status(500).json({ error: 'API呼び出しに失敗しました。' });
   }
 }
-
