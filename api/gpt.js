@@ -1,174 +1,85 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ごはんGPT - 自炊特化</title>
-  <style>
-    body {
-      background-color: #fdf6ef;
-      font-family: "Hiragino Kaku Gothic ProN", sans-serif;
-      margin: 0;
-      padding: 0;
-      color: #333;
-    }
-    .container {
-      max-width: 600px;
-      margin: 40px auto;
-      padding: 20px;
-      background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.05);
-    }
-    h1 {
-      text-align: center;
-      font-size: 1.8em;
-      color: #2f4f4f;
-      margin-bottom: 4px;
-    }
-    .form-group {
-      margin-bottom: 20px;
-    }
-    label {
-      display: block;
-      margin-bottom: 6px;
-      font-weight: bold;
-      font-size: 1em;
-    }
-    .required-label::after {
-      content: " *";
-      color: red;
-    }
-    select,
-    input[type="text"],
-    input[type="number"] {
-      width: 100%;
-      box-sizing: border-box;
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      font-size: 1em;
-    }
-    .checkbox-inline,
-    .checkbox-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .toggle-section {
-      display: none;
-      margin-top: 8px;
-    }
-    button {
-      width: 100%;
-      padding: 14px;
-      border: none;
-      border-radius: 12px;
-      background-color: #2f4f4f;
-      color: white;
-      font-size: 1em;
-      cursor: pointer;
-      margin-top: 20px;
-    }
-    .toggle-button {
-      background: none;
-      border: none;
-      color: #2f4f4f;
-      font-weight: bold;
-      cursor: pointer;
-      margin-bottom: 10px;
-    }
-    .section-divider {
-      border-top: 1px solid #aaa;
-      margin: 30px 0 20px;
-    }
-    .note {
-      font-size: 0.85em;
-      color: #999;
-      text-align: right;
-      margin-top: 16px;
-    }
-    .optional-heading {
-      margin-top: 12px;
-      font-weight: bold;
-      font-size: 1.1em;
-      color: #2f4f4f;
-    }
-    .intro {
-      font-size: 0.95em;
-      color: #555;
-      margin: 0 0 28px;
-      line-height: 1.6;
-      text-align: center;
-    }
-    @media screen and (max-width: 480px) {
-      .container {
-        border-radius: 0;
-        margin: 0;
-        padding: 16px;
-      }
-      h1 {
-        font-size: 1.5em;
-      }
-      button {
-        padding: 12px;
-        font-size: 0.95em;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1 style="margin-bottom: 24px;">ごはんGPT</h1>
-    <p class="intro">
-      ごはんGPTは、「おなかがすいた！」と思ったときに、<br>気分や予算に応じてすぐに自炊メニューを提案してくれるアプリです。
-    </p>
-    <form id="menuForm">
-      <p class="optional-heading">メニューを提案するために必要な情報を教えてください！</p>
-      <!-- フォーム入力項目省略（元のまま） -->
-      <button type="submit">メニューを提案する</button>
-    </form>
-    <p id="loading" style="display:none; color:#2f4f4f; font-weight:bold;">メニューを提案中です…</p>
-    <pre id="result" style="white-space:pre-wrap; background:#f9f9f9; padding:10px; border-radius:8px; margin-top:10px;"></pre>
-    <p class="note">※ <span style="color:red">*</span> は必須項目です</p>
-  </div>
-  <script>
-    function toggleAllergyInput() {
-      const checkbox = document.getElementById('hasAllergy');
-      const inputField = document.getElementById('allergyInput');
-      inputField.style.display = checkbox.checked ? 'block' : 'none';
-    }
-    function toggleDetails() {
-      const details = document.getElementById('detailsArea');
-      details.style.display = details.style.display === 'none' ? 'block' : 'none';
-    }
-    document.getElementById('menuForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const loadingEl = document.getElementById('loading');
-      const resultEl = document.getElementById('result');
-      loadingEl.style.display = 'block';
-      resultEl.textContent = '';
-      const formData = new FormData(e.target);
-      const body = Object.fromEntries(formData.entries());
-      body.tools = formData.getAll('tools');
-      try {
-        const res = await fetch('/api/gpt', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
-        });
-        const data = await res.json();
-        loadingEl.style.display = 'none';
-        if (!data.result || data.result.trim() === '') {
-          resultEl.textContent = 'メニューの提案が生成されませんでした。条件を見直してください。';
-        } else {
-          resultEl.textContent = data.result;
-        }
-      } catch (err) {
-        loadingEl.style.display = 'none';
-        resultEl.textContent = 'エラーが発生しました。';
-      }
+import { OpenAI } from 'openai';
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
+
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
+  const {
+    people,
+    mood,
+    budget,
+    cookingTime,
+    genre,
+    nutritionCare,
+    hasAllergy,
+    excludedIngredients,
+    tools,
+    ingredients
+  } = req.body;
+
+  if (!people || !mood || !budget || !cookingTime) {
+    return res.status(400).json({ error: '必須項目が不足しています。' });
+  }
+
+  const optionalLines = [];
+  if (genre) optionalLines.push(`- 希望ジャンル：${genre}`);
+  if (nutritionCare === 'on') optionalLines.push(`- 栄養バランスを考慮`);
+  if (hasAllergy === 'on' && excludedIngredients)
+    optionalLines.push(`- 除外したい食材：${excludedIngredients}`);
+  if (Array.isArray(tools) && tools.length > 0)
+    optionalLines.push(`- 利用可能な調理器具：${tools.join('、')}`);
+  if (ingredients) optionalLines.push(`- 消費したい食材：${ingredients}`);
+
+  const isSnack = mood === 'お酒に合う';
+  const fixedGuidelines = isSnack
+    ? ''
+    : `\n- 1食として完結したメニューであること。\n- 必ず「主食（ごはん・パン・麺など）」を含めること。\n- 主食を含まないメニュー（例：ポテトサラダ、きんぴらごぼう、サラダ、スープなど単体の副菜・汁物）は絶対に提案しないこと。\n- 主食＋副菜、主食＋汁物などのように、主食がメインとなる構成で提案すること。`;
+
+  const prompt = `あなたは料理提案アドバイザーです。以下の条件に基づいて、ユーザーがすぐに作れるようなレシピを10件提案してください。
+
+【条件】
+- 人数：${people}人分
+- 気分：${mood}
+- 予算：${budget}円以内
+- 調理可能時間：${cookingTime === 'unlimited' ? '制限なし' : `${cookingTime}分以内`}
+${optionalLines.length > 0 ? optionalLines.join('\n') : ''}
+${fixedGuidelines}
+
+【出力形式】
+HTMLで整形し、次のように出力してください：
+<h2>おすすめメニュー</h2>
+<ol>
+  <li>
+    <details>
+      <summary><strong>メニュー名</strong></summary>
+      <p><strong>材料：</strong><br>材料一覧（箇条書き）</p>
+      <p><strong>手順：</strong><br>手順（番号付き）</p>
+    </details>
+  </li>
+  ...（以下略）
+</ol>`;
+
+  try {
+    const chatCompletion = await openai.chat.completions.create({
+      messages: [
+        { role: 'system', content: 'あなたは優秀な料理メニューアドバイザーです。' },
+        { role: 'user', content: prompt }
+      ],
+      model: 'gpt-4'
     });
-  </script>
-</body>
-</html>
+
+    const response = chatCompletion.choices?.[0]?.message?.content;
+    if (!response || response.trim() === '') {
+      return res.status(200).json({ result: '' });
+    }
+    res.status(200).json({ result: response });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'API呼び出しに失敗しました。' });
+  }
+}
