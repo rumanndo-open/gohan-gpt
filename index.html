@@ -347,9 +347,12 @@ function generateRecipes() {
   });
 }
 
-function showDetails(title, description) {
-  document.getElementById("detailTitle").innerText = title;
-  document.getElementById("detailContent").innerText = description;
+function showDetails(recipe) {
+  document.getElementById("detailTitle").innerText = recipe.title;
+  document.getElementById("detailContent").innerHTML = `
+    <p>${recipe.description}</p>
+    <p><strong>所要時間:</strong> ${recipe.time} ｜ <strong>難易度:</strong> ${recipe.difficulty}</p>
+  `;
   document.getElementById("recipeDetail").style.display = "block";
 }
 
