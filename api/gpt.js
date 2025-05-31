@@ -1,12 +1,11 @@
 import OpenAI from 'openai';
 
-// OpenAI APIクライアントを初期化
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 
-// エントリポイント
-export async function handler(req) {
+// Vercel Edge Functions 用に default export を使用
+export default async function handler(req) {
   try {
     const body = await req.json();
 
@@ -21,13 +20,11 @@ export async function handler(req) {
       cookingTime
     } = body;
 
-    // オプション設定テキスト
     const nutritionNote = nutritionCare ? '栄養バランスも考慮した' : '';
     const allergyNote = excludedIngredients
       ? `以下の食材を除外してください：${excludedIngredients}`
       : '';
 
-    // プロンプト生成
     const prompt = `
 あなたは料理提案アドバイザーです。以下の条件に基づいて、${nutritionNote}自炊メニューを10件提案してください。
 
@@ -44,25 +41,18 @@ export async function handler(req) {
 ※副菜や軽食のみ（例：味噌汁・サラダのみ）はNG。
     `;
 
-    // ChatGPT API呼び出し
     const chatResponse = await openai.chat.completions.create({
       model: 'gpt-4o',
       messages: [
-        {
-          role: 'user',
-          content: prompt
-        }
+        { role: 'user', content: prompt }
       ],
       temperature: 0.7
     });
 
-    // 結果を返す
     return new Response(JSON.stringify({
       result: chatResponse.choices[0].message.content
     }), {
-      headers: {
-        'Content-Type': 'application/json'
-      }
+      headers: { 'Content-Type': 'application/json' }
     });
 
   } catch (error) {
@@ -72,9 +62,7 @@ export async function handler(req) {
       details: error.message
     }), {
       status: 500,
-      headers: {
-        'Content-Type': 'application/json'
-      }
+      headers: { 'Content-Type': 'application/json' }
     });
   }
 }
