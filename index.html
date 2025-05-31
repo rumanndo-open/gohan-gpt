@@ -275,32 +275,51 @@
       details.style.display = details.style.display === 'none' ? 'block' : 'none';
     }
     document.getElementById('menuForm').addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const loadingEl = document.getElementById('loading');
-      const resultEl = document.getElementById('result');
-      loadingEl.style.display = 'block';
-      resultEl.textContent = '';
-      const formData = new FormData(e.target);
-      const body = Object.fromEntries(formData.entries());
-      body.tools = formData.getAll('tools');
-      try {
-        const res = await fetch('/api/gpt', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
-        });
-        const data = await res.json();
-        loadingEl.style.display = 'none';
-        if (!data.result || data.result.trim() === '') {
-          resultEl.textContent = 'メニューの提案が生成されませんでした。条件を見直してください。';
-        } else {
-          resultEl.innerHTML = data.result;
-        }
-      } catch (err) {
-        loadingEl.style.display = 'none';
-        resultEl.textContent = 'エラーが発生しました。';
-      }
+  e.preventDefault();
+  const loadingEl = document.getElementById('loading');
+  const resultEl = document.getElementById('result');
+  const list = document.getElementById("recipeList");
+
+  loadingEl.style.display = 'block';
+  resultEl.textContent = '';
+  list.innerHTML = '';
+
+  const formData = new FormData(e.target);
+  const body = Object.fromEntries(formData.entries());
+  body.tools = formData.getAll('tools');
+
+  try {
+    const res = await fetch('/api/gpt', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
     });
+
+    const data = await res.json();
+    loadingEl.style.display = 'none';
+
+    const match = data.result.match(/\[\s*\{[\s\S]+?\}\s*\]/);
+    if (!match) {
+      resultEl.textContent = 'レシピが取得できませんでした。';
+      return;
+    }
+
+    const recipes = JSON.parse(match[0]);
+    recipes.forEach(recipe => {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `<h3>${recipe.title}</h3>`;
+      card.onclick = () => showDetails(recipe);
+      list.appendChild(card);
+    });
+
+    hideDetails();
+  } catch (err) {
+    console.error(err);
+    loadingEl.style.display = 'none';
+    resultEl.textContent = 'エラーが発生しました。';
+  }
+});
   </script>
 </body>
 </html>
