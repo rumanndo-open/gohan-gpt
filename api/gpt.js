@@ -4,10 +4,15 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 
-// Vercel Edge Functions 用に default export を使用
-export default async function handler(req) {
+export default async function handler(req, res) {
   try {
-    const body = await req.json();
+    // Node.jsのreqからボディを取得（stream → text → JSONに変換）
+    const buffers = [];
+    for await (const chunk of req) {
+      buffers.push(chunk);
+    }
+    const rawBody = Buffer.concat(buffers).toString();
+    const body = JSON.parse(rawBody);
 
     const {
       mood,
@@ -43,26 +48,24 @@ export default async function handler(req) {
 
     const chatResponse = await openai.chat.completions.create({
       model: 'gpt-4o',
-      messages: [
-        { role: 'user', content: prompt }
-      ],
+      messages: [{ role: 'user', content: prompt }],
       temperature: 0.7
     });
 
-    return new Response(JSON.stringify({
+    // VercelではNodeのresを使って返却
+    res.statusCode = 200;
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({
       result: chatResponse.choices[0].message.content
-    }), {
-      headers: { 'Content-Type': 'application/json' }
-    });
+    }));
 
   } catch (error) {
     console.error('エラー:', error);
-    return new Response(JSON.stringify({
+    res.statusCode = 500;
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({
       error: 'レシピ生成中にエラーが発生しました。',
       details: error.message
-    }), {
-      status: 500,
-      headers: { 'Content-Type': 'application/json' }
-    });
+    }));
   }
 }
