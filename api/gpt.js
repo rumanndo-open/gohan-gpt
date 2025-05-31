@@ -94,5 +94,4 @@ CSSも併せて整形してください。
     console.error(error);
     res.status(500).json({ error: 'API呼び出しに失敗しました。' });
   }
-  }
-}
+
