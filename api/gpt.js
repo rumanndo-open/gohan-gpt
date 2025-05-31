@@ -62,7 +62,19 @@ HTMLで整形し、次のように出力してください：
     </details>
   </li>
   ...（以下略）
-</ol>`;
+</ol>
+
+CSSで各メニューをタイル形式（カード風）に表示するには、以下のようなHTML構造にしてください：
+<div class="menu-grid">
+  <div class="menu-card">
+    <h3>メニュー名</h3>
+    <p><strong>材料：</strong><br>材料一覧</p>
+    <p><strong>手順：</strong><br>番号付き手順</p>
+  </div>
+  ...（繰り返し）
+</div>
+
+CSSも併せて整形してください。
 
   try {
     const chatCompletion = await openai.chat.completions.create({
