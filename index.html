@@ -320,6 +320,78 @@
     resultEl.textContent = 'エラーが発生しました。';
   }
 });
-  </script>
+  
+<script>
+  function toggleAllergyInput() {
+    const checkbox = document.getElementById('hasAllergy');
+    const inputField = document.getElementById('allergyInput');
+    inputField.style.display = checkbox.checked ? 'block' : 'none';
+  }
+
+  function toggleDetails() {
+    const details = document.getElementById('detailsArea');
+    details.style.display = details.style.display === 'none' ? 'block' : 'none';
+  }
+
+  function showDetails(recipe) {
+    document.getElementById("detailTitle").innerText = recipe.title;
+    document.getElementById("detailContent").innerHTML = `
+      <p>${recipe.description}</p>
+      <p><strong>所要時間:</strong> ${recipe.time} ｜ <strong>難易度:</strong> ${recipe.difficulty}</p>
+    `;
+    document.getElementById("recipeDetail").style.display = "block";
+  }
+
+  function hideDetails() {
+    document.getElementById("recipeDetail").style.display = "none";
+  }
+
+  document.getElementById('menuForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const loadingEl = document.getElementById('loading');
+    const resultEl = document.getElementById('result');
+    const list = document.getElementById("recipeList");
+
+    loadingEl.style.display = 'block';
+    resultEl.textContent = '';
+    list.innerHTML = '';
+
+    const formData = new FormData(e.target);
+    const body = Object.fromEntries(formData.entries());
+    body.tools = formData.getAll('tools');
+
+    try {
+      const res = await fetch('/api/gpt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+
+      const data = await res.json();
+      loadingEl.style.display = 'none';
+
+      const match = data.result.match(/\[\s*\{[\s\S]+?\}\s*\]/);
+      if (!match) {
+        resultEl.textContent = 'レシピが取得できませんでした。';
+        return;
+      }
+
+      const recipes = JSON.parse(match[0]);
+      recipes.forEach(recipe => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `<h3>${recipe.title}</h3>`;
+        card.onclick = () => showDetails(recipe);
+        list.appendChild(card);
+      });
+
+      hideDetails();
+    } catch (err) {
+      console.error(err);
+      loadingEl.style.display = 'none';
+      resultEl.textContent = 'エラーが発生しました。';
+    }
+  });
+</script>
 </body>
 </html>
