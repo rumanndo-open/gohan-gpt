@@ -22,7 +22,7 @@ export default async function handler(req, res) {
     ingredients
   } = req.body;
 
-  // 必須項目のバリデーション
+  // 必須バリデーション
   if (!people || !mood || !budget || !cookingTime) {
     return res.status(400).json({ error: '必須項目が不足しています。' });
   }
@@ -37,15 +37,6 @@ export default async function handler(req, res) {
     optionalLines.push(`- 利用可能な調理器具：${tools.join('、')}`);
   if (ingredients) optionalLines.push(`- 消費したい食材：${ingredients}`);
 
-  // 「お酒に合う」以外は食事完結ルールを追加
-  const isSnack = mood === 'お酒に合う';
-  const fixedGuidelines = isSnack
-    ? ''
-    : `\n- 1食として完結したメニューであること。
-- 必ず「主食（ごはん・パン・麺など）」を含めること。
-- 主食を含まないメニュー（例：ポテトサラダ、きんぴらごぼう、サラダ、スープなど単体の副菜・汁物）は絶対に提案しないこと。
-- 主食＋副菜、主食＋汁物などのように、主食がメインとなる構成で提案すること。`;
-
   const prompt = `あなたは料理提案アドバイザーです。以下の条件に基づいて、自炊メニューを10件提案してください。
 
 【条件】
@@ -53,7 +44,8 @@ export default async function handler(req, res) {
 - 気分：${mood}
 - 予算：${budget}円以内
 - 調理可能時間：${cookingTime === 'unlimited' ? '制限なし' : `${cookingTime}分以内`}
-${optionalLines.length > 0 ? optionalLines.join('\n') : ''}${fixedGuidelines}`;
+${optionalLines.length > 0 ? optionalLines.join('\n') : ''}
+※すべて1食として完結する料理とし、主食（ごはん・パン・麺など）を必ず含めてください。`;
 
   try {
     const chatCompletion = await openai.chat.completions.create({
