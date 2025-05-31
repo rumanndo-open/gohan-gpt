@@ -1,200 +1,182 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ごはんGPT - 自炊特化</title>
-  <style>
-    body {
-      background-color: #fdf6ef;
-      font-family: "Hiragino Kaku Gothic ProN", sans-serif;
-      margin: 0;
-      padding: 20px;
-      color: #333;
-    }
-
-    .container {
-      max-width: 700px;
-      margin: auto;
-      background: #fff;
-      padding: 24px;
-      border-radius: 20px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.05);
-    }
-
-    h1 {
-      text-align: center;
-      font-size: 1.8em;
-      margin-bottom: 24px;
-      color: #2f4f4f;
-    }
-
-    .form-group {
-      margin-bottom: 16px;
-    }
-
-    label {
-      display: block;
-      font-weight: bold;
-      margin-bottom: 4px;
-    }
-
-    input, select, textarea {
-      width: 100%;
-      padding: 8px;
-      font-size: 1em;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-    }
-
-    button {
-      background-color: #ff914d;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      font-size: 1em;
-      border-radius: 12px;
-      cursor: pointer;
-      margin-top: 16px;
-    }
-
-    .card-container {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      margin-top: 24px;
-      justify-content: center;
-    }
-
-    .card {
-      background-color: #fffefc;
-      border: 1px solid #eee;
-      border-radius: 12px;
-      padding: 16px;
-      width: 260px;
-      cursor: pointer;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-      transition: transform 0.2s ease;
-    }
-
-    .card:hover {
-      transform: scale(1.02);
-    }
-
-    .detail-box {
-      margin-top: 24px;
-      padding: 20px;
-      background: #f9f9f9;
-      border-radius: 12px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-      display: none;
-    }
-
-    .detail-box button {
-      float: right;
-      background-color: #ccc;
-      color: #333;
-    }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <h1>ごはんGPT</h1>
-
-    <div class="form-group">
-      <label for="mood">気分</label>
-      <input type="text" id="mood" placeholder="例: さっぱりしたもの">
-    </div>
-
-    <div class="form-group">
-      <label for="budget">予算（円）</label>
-      <input type="number" id="budget" placeholder="例: 500">
-    </div>
-
-    <div class="form-group">
-      <label for="cookingTime">調理可能時間（分）</label>
-      <input type="number" id="cookingTime" placeholder="例: 30">
-    </div>
-
-    <div class="form-group">
-      <label for="nutritionCare">
-        <input type="checkbox" id="nutritionCare">
-        栄養バランスを気にする
-      </label>
-    </div>
-
-    <div class="form-group">
-      <label for="excludedIngredients">避けたい食材</label>
-      <input type="text" id="excludedIngredients" placeholder="例: 卵、牛乳">
-    </div>
-
-    <div class="form-group">
-      <label for="genre">ジャンル</label>
-      <input type="text" id="genre" placeholder="例: 和食、イタリアン">
-    </div>
-
-    <button onclick="generateRecipes()">提案してもらう</button>
-
-    <div id="recipeList" class="card-container"></div>
-
-    <div id="recipeDetail" class="detail-box">
-      <button onclick="hideDetails()">× 閉じる</button>
-      <h2 id="detailTitle"></h2>
-      <p id="detailContent"></p>
+<form id="menuForm">
+<p class="optional-heading">メニューを提案するために必要な情報を教えてください！</p>
+<div class="form-group">
+        <label for="people" class="required-label">何人分の料理を作りますか？</label>
+        <select name="people" id="people">
+          <option value="1" selected>1人分</option>
+          <option value="2">2人分</option>
+          <option value="3">3人分</option>
+          <option value="4">4人分</option>
+          <option value="5">5人以上</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="mood" class="required-label">気分</label>
+        <select name="mood" id="mood">
+          <option value="">選択してください</option>
+          <option value="疲れている">疲れている（時短・簡単メニュー）</option>
+          <option value="がっつり食べたい">がっつり食べたい（ボリューム系）</option>
+          <option value="さっぱりしたい">さっぱりしたい（あっさり・ヘルシー系）</option>
+          <option value="野菜をとりたい">野菜をとりたい（バランス重視）</option>
+          <option value="お酒に合う">お酒に合う（宅飲み用）</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="budget" class="required-label">予算</label>
+        <select name="budget" id="budget">
+          <option value="1000" selected>1,000円以内</option>
+          <option value="1500">1,500円以内</option>
+          <option value="2000">2,000円以内</option>
+          <option value="2500">2,500円以内</option>
+          <option value="3000">3,000円以内</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="cookingTime" class="required-label">調理可能時間（分）</label>
+        <select name="cookingTime" id="cookingTime">
+          <option value="10" selected>〜10分</option>
+          <option value="30">〜30分</option>
+          <option value="60">〜60分</option>
+          <option value="unlimited">時間は気にしない</option>
+        </select>
+      </div>
+      <p class="optional-heading">こちらも入力すると、よりぴったりな提案になります！</p>
+      <div class="form-group">
+        <label for="genre">希望ジャンル</label>
+        <select name="genre" id="genre">
+          <option value="">指定なし</option>
+          <option value="和食">和食</option>
+          <option value="洋食">洋食</option>
+          <option value="中華">中華</option>
+          <option value="韓国">韓国</option>
+          <option value="イタリアン">イタリアン</option>
+          <option value="エスニック">エスニック</option>
+        </select>
+      </div>
+      <div class="form-group checkbox-inline">
+        <label><input type="checkbox" id="nutritionCare" name="nutritionCare"> 栄養バランスを気にする</label>
+      </div>
+      <div class="form-group">
+        <label><input type="checkbox" id="hasAllergy" name="hasAllergy" onchange="toggleAllergyInput()"> アレルギーがある</label>
+        <div class="toggle-section" id="allergyInput">
+          <input type="text" name="excludedIngredients" placeholder="除外したい食材を入力（例：乳、小麦）">
+        </div>
+      </div>
+      <div class="section-divider"></div>
+      <button type="button" class="toggle-button" onclick="toggleDetails()">🔧 詳細設定を開く／閉じる</button>
+      <div id="detailsArea" style="display: none;">
+        <div class="form-group">
+          <label>利用できる調理器具（複数選択可）</label>
+          <div class="checkbox-group">
+            <label><input type="checkbox" name="tools" value="電子レンジ"> 電子レンジ</label>
+            <label><input type="checkbox" name="tools" value="フライパン"> フライパン</label>
+            <label><input type="checkbox" name="tools" value="鍋"> 鍋</label>
+            <label><input type="checkbox" name="tools" value="トースター"> トースター</label>
+            <label><input type="checkbox" name="tools" value="オーブン"> オーブン</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="ingredients">消費したい食材</label>
+          <input type="text" name="ingredients" id="ingredients" placeholder="例：卵、キャベツ、鶏肉">
+        </div>
+      </div>
+  <label for="people" class="required-label">何人分の料理を作りますか？</label>
+  <select name="people" id="people">
+    <option value="1" selected>1人分</option>
+    <option value="2">2人分</option>
+    <option value="3">3人分</option>
+    <option value="4">4人分</option>
+    <option value="5">5人以上</option>
+  </select>
+</div>
+<div class="form-group">
+  <label for="mood" class="required-label">気分</label>
+  <select name="mood" id="mood">
+    <option value="">選択してください</option>
+    <option value="疲れている">疲れている（時短・簡単メニュー）</option>
+    <option value="がっつり食べたい">がっつり食べたい（ボリューム系）</option>
+    <option value="さっぱりしたい">さっぱりしたい（あっさり・ヘルシー系）</option>
+    <option value="野菜をとりたい">野菜をとりたい（バランス重視）</option>
+    <option value="お酒に合う">お酒に合う（宅飲み用）</option>
+  </select>
+</div>
+<div class="form-group">
+  <label for="budget" class="required-label">予算</label>
+  <select name="budget" id="budget">
+    <option value="1000" selected>1,000円以内</option>
+    <option value="1500">1,500円以内</option>
+    <option value="2000">2,000円以内</option>
+    <option value="2500">2,500円以内</option>
+    <option value="3000">3,000円以内</option>
+  </select>
+</div>
+<div class="form-group">
+  <label for="cookingTime" class="required-label">調理可能時間（分）</label>
+  <select name="cookingTime" id="cookingTime">
+    <option value="10" selected>〜10分</option>
+    <option value="30">〜30分</option>
+    <option value="60">〜60分</option>
+    <option value="unlimited">時間は気にしない</option>
+  </select>
+</div>
+<p class="optional-heading">こちらも入力すると、よりぴったりな提案になります！</p>
+<div class="form-group">
+  <label for="genre">希望ジャンル</label>
+  <select name="genre" id="genre">
+    <option value="">指定なし</option>
+    <option value="和食">和食</option>
+    <option value="洋食">洋食</option>
+    <option value="中華">中華</option>
+    <option value="韓国">韓国</option>
+    <option value="イタリアン">イタリアン</option>
+    <option value="エスニック">エスニック</option>
+  </select>
+</div>
+<div class="form-group checkbox-inline">
+  <label><input type="checkbox" id="nutritionCare" name="nutritionCare"> 栄養バランスを気にする</label>
+</div>
+<div class="form-group">
+  <label><input type="checkbox" id="hasAllergy" name="hasAllergy" onchange="toggleAllergyInput()"> アレルギーがある</label>
+  <div class="toggle-section" id="allergyInput">
+    <input type="text" name="excludedIngredients" placeholder="除外したい食材を入力（例：乳、小麦）">
+  </div>
+</div>
+<div class="section-divider"></div>
+<button type="button" class="toggle-button" onclick="toggleDetails()">🔧 詳細設定を開く／閉じる</button>
+<div id="detailsArea" style="display: none;">
+  <div class="form-group">
+    <label>利用できる調理器具（複数選択可）</label>
+    <div class="checkbox-group">
+      <label><input type="checkbox" name="tools" value="電子レンジ"> 電子レンジ</label>
+      <label><input type="checkbox" name="tools" value="フライパン"> フライパン</label>
+      <label><input type="checkbox" name="tools" value="鍋"> 鍋</label>
+      <label><input type="checkbox" name="tools" value="トースター"> トースター</label>
+      <label><input type="checkbox" name="tools" value="オーブン"> オーブン</label>
     </div>
   </div>
-
-  <script>
-    function generateRecipes() {
-      const mood = document.getElementById("mood").value;
-      const budget = document.getElementById("budget").value;
-      const cookingTime = document.getElementById("cookingTime").value;
-      const nutritionCare = document.getElementById("nutritionCare").checked ? "栄養バランスを考慮する。" : "";
-      const excludedIngredients = document.getElementById("excludedIngredients").value;
-      const genre = document.getElementById("genre").value;
-
-      const prompt = `あなたは料理提案アドバイザーです。以下の条件に基づいて、${nutritionCare}自炊メニューを10件提案してください。
-
-【条件】
-- 気分：${mood}
-- 予算：${budget}円
-- 調理時間：${cookingTime}分
-- 除外食材：${excludedIngredients || "指定なし"}
-- ジャンル：${genre || "指定なし"}
-- 1食として完結すること。主食（ごはん・パン・麺など）を必ず含め、予算の余裕があれば主菜または汁物を合わせて提案すること。
-- 出力形式：「メニュー名：説明文（1文）」を10個、1行ずつ`;
-
-      fetch("/api/gpt", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt })
-      })
-      .then(res => res.json())
-      .then(data => {
-        const list = document.getElementById("recipeList");
-        list.innerHTML = "";
-        const lines = data.text.split("\n").filter(line => line.includes("："));
-        lines.forEach(line => {
-          const [title, description] = line.split("：");
-          const card = document.createElement("div");
-          card.className = "card";
-          card.innerHTML = `<h3>${title.trim()}</h3>`;
-          card.onclick = () => showDetails(title.trim(), description.trim());
-          list.appendChild(card);
-        });
-        hideDetails();
-      });
-    }
-
-    function showDetails(title, description) {
-      document.getElementById("detailTitle").innerText = title;
-      document.getElementById("detailContent").innerText = description;
-      document.getElementById("recipeDetail").style.display = "block";
-    }
-
-    function hideDetails() {
-      document.getElementById("recipeDetail").style.display = "none";
-    }
-  </script>
-</body>
-</html>
+  <div class="form-group">
+    <label for="ingredients">消費したい食材</label>
+    <input type="text" name="ingredients" id="ingredients" placeholder="例：卵、キャベツ、鶏肉">
+  </div>
+</div>
+<button type="submit">メニューを提案する</button>
+</form>
+<p id="loading" style="display:none; color:#2f4f4f; font-weight:bold;">メニューを提案中です…</p>
+    <pre id="result" style="white-space:pre-wrap; background:#f9f9f9; padding:10px; border-radius:8px; margin-top:10px;"></pre>
+    <div id="result" style="margin-top: 20px;"></div>
+<p class="note">※ <span style="color:red">*</span> は必須項目です</p>
+</div>
+<script>
+@@ -238,7 +238,11 @@ <h1 style="margin-bottom: 24px;">ごはんGPT</h1>
+});
+const data = await res.json();
+loadingEl.style.display = 'none';
+        resultEl.textContent = data.result || '提案が見つかりませんでした。';
+        if (!data.result || data.result.trim() === '') {
+          resultEl.textContent = 'メニューの提案が生成されませんでした。条件を見直してください。';
+        } else {
+          resultEl.innerHTML = data.result;
+        }
+} catch (err) {
+loadingEl.style.display = 'none';
+resultEl.textContent = 'エラーが発生しました。';
