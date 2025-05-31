@@ -115,7 +115,49 @@
         font-size: 0.95em;
       }
     }
-  </style>
+  
+    .card-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: center;
+      margin-top: 24px;
+    }
+
+    .card {
+      background-color: #fffefc;
+      border: 1px solid #eee;
+      border-radius: 12px;
+      padding: 16px;
+      width: 260px;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+      transition: transform 0.2s ease;
+    }
+
+    .card:hover {
+      transform: scale(1.02);
+    }
+
+    .detail-box {
+      margin-top: 24px;
+      padding: 20px;
+      background: #f9f9f9;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    .detail-box button {
+      float: right;
+      background-color: #ccc;
+      color: #333;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+</style>
 </head>
 <body>
   <div class="container">
@@ -207,6 +249,17 @@
 </div>
       <button type="submit">メニューを提案する</button>
     </form>
+
+    <!-- レシピ一覧 -->
+    <div id="recipeList" class="card-container"></div>
+
+    <!-- レシピ詳細表示 -->
+    <div id="recipeDetail" class="detail-box" style="display:none;">
+      <button onclick="hideDetails()">× 閉じる</button>
+      <h2 id="detailTitle"></h2>
+      <p id="detailContent"></p>
+    </div>
+
     <p id="loading" style="display:none; color:#2f4f4f; font-weight:bold;">メニューを提案中です…</p>
     <div id="result" style="margin-top: 20px;"></div>
     <p class="note">※ <span style="color:red">*</span> は必須項目です</p>
@@ -251,3 +304,56 @@
   </script>
 </body>
 </html>
+
+<script>
+function generateRecipes() {
+  const mood = document.getElementById("mood").value;
+  const budget = document.getElementById("budget").value;
+  const cookingTime = document.getElementById("cookingTime").value;
+  const nutritionCare = document.getElementById("nutritionCare")?.checked ? "栄養バランスを考慮する。" : "";
+  const excludedIngredients = document.getElementById("excludedIngredients")?.value || "";
+  const genre = document.getElementById("genre")?.value || "";
+
+  const prompt = `あなたは料理提案アドバイザーです。以下の条件に基づいて、${nutritionCare}自炊メニューを10件提案してください。
+
+【条件】
+- 気分：${mood}
+- 予算：${budget}円
+- 調理時間：${cookingTime}分
+- 除外食材：${excludedIngredients || "指定なし"}
+- ジャンル：${genre || "指定なし"}
+- 1食として完結すること。主食（ごはん・パン・麺など）を必ず含め、予算の余裕があれば主菜または汁物を合わせて提案すること。
+- 出力形式：「メニュー名：説明文（1文）」を10個、1行ずつ`;
+
+  fetch("/api/gpt", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ prompt })
+  })
+  .then(res => res.json())
+  .then(data => {
+    const list = document.getElementById("recipeList");
+    list.innerHTML = "";
+    const lines = data.text.split("\n").filter(line => line.includes("："));
+    lines.forEach(line => {
+      const [title, description] = line.split("：");
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `<h3>${title.trim()}</h3>`;
+      card.onclick = () => showDetails(title.trim(), description.trim());
+      list.appendChild(card);
+    });
+    hideDetails(); // 初期化
+  });
+}
+
+function showDetails(title, description) {
+  document.getElementById("detailTitle").innerText = title;
+  document.getElementById("detailContent").innerText = description;
+  document.getElementById("recipeDetail").style.display = "block";
+}
+
+function hideDetails() {
+  document.getElementById("recipeDetail").style.display = "none";
+}
+</script>
