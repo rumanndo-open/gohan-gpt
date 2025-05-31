@@ -126,89 +126,89 @@
     <form id="menuForm">
       <p class="optional-heading">メニューを提案するために必要な情報を教えてください！</p>
       <div class="form-group">
-        <label for="people" class="required-label">何人分の料理を作りますか？</label>
-        <select name="people" id="people">
-          <option value="1" selected>1人分</option>
-          <option value="2">2人分</option>
-          <option value="3">3人分</option>
-          <option value="4">4人分</option>
-          <option value="5">5人以上</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label for="mood" class="required-label">気分</label>
-        <select name="mood" id="mood">
-          <option value="">選択してください</option>
-          <option value="疲れている">疲れている（時短・簡単メニュー）</option>
-          <option value="がっつり食べたい">がっつり食べたい（ボリューム系）</option>
-          <option value="さっぱりしたい">さっぱりしたい（あっさり・ヘルシー系）</option>
-          <option value="野菜をとりたい">野菜をとりたい（バランス重視）</option>
-          <option value="お酒に合う">お酒に合う（宅飲み用）</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label for="budget" class="required-label">予算</label>
-        <select name="budget" id="budget">
-          <option value="1000" selected>1,000円以内</option>
-          <option value="1500">1,500円以内</option>
-          <option value="2000">2,000円以内</option>
-          <option value="2500">2,500円以内</option>
-          <option value="3000">3,000円以内</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label for="cookingTime" class="required-label">調理可能時間（分）</label>
-        <select name="cookingTime" id="cookingTime">
-          <option value="10" selected>〜10分</option>
-          <option value="30">〜30分</option>
-          <option value="60">〜60分</option>
-          <option value="unlimited">時間は気にしない</option>
-        </select>
-      </div>
-      <p class="optional-heading">こちらも入力すると、よりぴったりな提案になります！</p>
-      <div class="form-group">
-        <label for="genre">希望ジャンル</label>
-        <select name="genre" id="genre">
-          <option value="">指定なし</option>
-          <option value="和食">和食</option>
-          <option value="洋食">洋食</option>
-          <option value="中華">中華</option>
-          <option value="韓国">韓国</option>
-          <option value="イタリアン">イタリアン</option>
-          <option value="エスニック">エスニック</option>
-        </select>
-      </div>
-      <div class="form-group checkbox-inline">
-        <label><input type="checkbox" id="nutritionCare" name="nutritionCare"> 栄養バランスを気にする</label>
-      </div>
-      <div class="form-group">
-        <label><input type="checkbox" id="hasAllergy" name="hasAllergy" onchange="toggleAllergyInput()"> アレルギーがある</label>
-        <div class="toggle-section" id="allergyInput">
-          <input type="text" name="excludedIngredients" placeholder="除外したい食材を入力（例：乳、小麦）">
-        </div>
-      </div>
-      <div class="section-divider"></div>
-      <button type="button" class="toggle-button" onclick="toggleDetails()">🔧 詳細設定を開く／閉じる</button>
-      <div id="detailsArea" style="display: none;">
-        <div class="form-group">
-          <label>利用できる調理器具（複数選択可）</label>
-          <div class="checkbox-group">
-            <label><input type="checkbox" name="tools" value="電子レンジ"> 電子レンジ</label>
-            <label><input type="checkbox" name="tools" value="フライパン"> フライパン</label>
-            <label><input type="checkbox" name="tools" value="鍋"> 鍋</label>
-            <label><input type="checkbox" name="tools" value="トースター"> トースター</label>
-            <label><input type="checkbox" name="tools" value="オーブン"> オーブン</label>
-          </div>
-        </div>
-        <div class="form-group">
-          <label for="ingredients">消費したい食材</label>
-          <input type="text" name="ingredients" id="ingredients" placeholder="例：卵、キャベツ、鶏肉">
-        </div>
-      </div>
+  <label for="people" class="required-label">何人分の料理を作りますか？</label>
+  <select name="people" id="people">
+    <option value="1" selected>1人分</option>
+    <option value="2">2人分</option>
+    <option value="3">3人分</option>
+    <option value="4">4人分</option>
+    <option value="5">5人以上</option>
+  </select>
+</div>
+<div class="form-group">
+  <label for="mood" class="required-label">気分</label>
+  <select name="mood" id="mood">
+    <option value="">選択してください</option>
+    <option value="疲れている">疲れている（時短・簡単メニュー）</option>
+    <option value="がっつり食べたい">がっつり食べたい（ボリューム系）</option>
+    <option value="さっぱりしたい">さっぱりしたい（あっさり・ヘルシー系）</option>
+    <option value="野菜をとりたい">野菜をとりたい（バランス重視）</option>
+    <option value="お酒に合う">お酒に合う（宅飲み用）</option>
+  </select>
+</div>
+<div class="form-group">
+  <label for="budget" class="required-label">予算</label>
+  <select name="budget" id="budget">
+    <option value="1000" selected>1,000円以内</option>
+    <option value="1500">1,500円以内</option>
+    <option value="2000">2,000円以内</option>
+    <option value="2500">2,500円以内</option>
+    <option value="3000">3,000円以内</option>
+  </select>
+</div>
+<div class="form-group">
+  <label for="cookingTime" class="required-label">調理可能時間（分）</label>
+  <select name="cookingTime" id="cookingTime">
+    <option value="10" selected>〜10分</option>
+    <option value="30">〜30分</option>
+    <option value="60">〜60分</option>
+    <option value="unlimited">時間は気にしない</option>
+  </select>
+</div>
+<p class="optional-heading">こちらも入力すると、よりぴったりな提案になります！</p>
+<div class="form-group">
+  <label for="genre">希望ジャンル</label>
+  <select name="genre" id="genre">
+    <option value="">指定なし</option>
+    <option value="和食">和食</option>
+    <option value="洋食">洋食</option>
+    <option value="中華">中華</option>
+    <option value="韓国">韓国</option>
+    <option value="イタリアン">イタリアン</option>
+    <option value="エスニック">エスニック</option>
+  </select>
+</div>
+<div class="form-group checkbox-inline">
+  <label><input type="checkbox" id="nutritionCare" name="nutritionCare"> 栄養バランスを気にする</label>
+</div>
+<div class="form-group">
+  <label><input type="checkbox" id="hasAllergy" name="hasAllergy" onchange="toggleAllergyInput()"> アレルギーがある</label>
+  <div class="toggle-section" id="allergyInput">
+    <input type="text" name="excludedIngredients" placeholder="除外したい食材を入力（例：乳、小麦）">
+  </div>
+</div>
+<div class="section-divider"></div>
+<button type="button" class="toggle-button" onclick="toggleDetails()">🔧 詳細設定を開く／閉じる</button>
+<div id="detailsArea" style="display: none;">
+  <div class="form-group">
+    <label>利用できる調理器具（複数選択可）</label>
+    <div class="checkbox-group">
+      <label><input type="checkbox" name="tools" value="電子レンジ"> 電子レンジ</label>
+      <label><input type="checkbox" name="tools" value="フライパン"> フライパン</label>
+      <label><input type="checkbox" name="tools" value="鍋"> 鍋</label>
+      <label><input type="checkbox" name="tools" value="トースター"> トースター</label>
+      <label><input type="checkbox" name="tools" value="オーブン"> オーブン</label>
+    </div>
+  </div>
+  <div class="form-group">
+    <label for="ingredients">消費したい食材</label>
+    <input type="text" name="ingredients" id="ingredients" placeholder="例：卵、キャベツ、鶏肉">
+  </div>
+</div>
       <button type="submit">メニューを提案する</button>
     </form>
     <p id="loading" style="display:none; color:#2f4f4f; font-weight:bold;">メニューを提案中です…</p>
-    <pre id="result" style="white-space:pre-wrap; background:#f9f9f9; padding:10px; border-radius:8px; margin-top:10px;"></pre>
+    <div id="result" style="margin-top: 20px;"></div>
     <p class="note">※ <span style="color:red">*</span> は必須項目です</p>
   </div>
   <script>
@@ -238,7 +238,11 @@
         });
         const data = await res.json();
         loadingEl.style.display = 'none';
-        resultEl.textContent = data.result || '提案が見つかりませんでした。';
+        if (!data.result || data.result.trim() === '') {
+          resultEl.textContent = 'メニューの提案が生成されませんでした。条件を見直してください。';
+        } else {
+          resultEl.innerHTML = data.result;
+        }
       } catch (err) {
         loadingEl.style.display = 'none';
         resultEl.textContent = 'エラーが発生しました。';
