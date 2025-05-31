@@ -6,7 +6,6 @@ const openai = new OpenAI({
 
 export default async function handler(req, res) {
   try {
-    // Node.jsのreqからボディを取得（stream → text → JSONに変換）
     const buffers = [];
     for await (const chunk of req) {
       buffers.push(chunk);
@@ -31,50 +30,21 @@ export default async function handler(req, res) {
       : '';
 
     const prompt =
-      "あなたは料理提案アドバイザーです。以下の条件に基づいて、栄養や制限も考慮し、自炊メニューを10件提案してください。
-
-" +
-      "【条件】
-" +
-      "- 気分：" + mood + "
-" +
-      "- 動ける範囲：" + range + "
-" +
-      "- 所持食材：" + (ingredients || '指定なし') + "
-" +
-      "- 予算：" + budget + "
-" +
-      "- ジャンル：" + (genre || '指定なし') + "
-" +
-      "- 調理可能時間：" + (cookingTime || '指定なし') + "
-" +
-      "- " + allergyNote + "
-
-" +
-      "※1食として完結すること。主食（ごはん・パン・麺など）を必ず含め、予算に余裕があれば主菜や汁物を追加してください。
-" +
-      "※副菜だけのメニュー（例：味噌汁だけ、サラダだけ）はNGです。
-
-" +
-      "※出力形式は以下の通りで、JSON配列のみを返してください。説明文やコメント、```json などの囲み、余計な文は出力しないでください：
-
-" +
-      "[
-" +
-      "  {
-" +
-      "    \"title\": \"メニュー名\",
-" +
-      "    \"description\": \"簡潔な説明文（1文）\",
-" +
-      "    \"time\": \"約◯分\",
-" +
-      "    \"difficulty\": \"★ 〜 ★★★\"
-" +
-      "  },
-" +
-      "  ...
-" +
+      "あなたは料理提案アドバイザーです。以下の条件に基づいて、" + nutritionNote + "自炊メニューを10件提案してください。\\n\\n" +
+      "【条件】\\n" +
+      "- 気分：" + mood + "\\n" +
+      "- 動ける範囲：" + range + "\\n" +
+      "- 所持食材：" + (ingredients || '指定なし') + "\\n" +
+      "- 予算：" + budget + "\\n" +
+      "- ジャンル：" + (genre || '指定なし') + "\\n" +
+      "- 調理可能時間：" + (cookingTime || '指定なし') + "\\n" +
+      "- " + allergyNote + "\\n\\n" +
+      "※1食として完結すること。主食（ごはん・パン・麺など）を必ず含め、予算に余裕があれば主菜や汁物を追加してください。\\n" +
+      "※副菜だけのメニュー（例：味噌汁だけ、サラダだけ）はNGです。\\n\\n" +
+      "※出力形式は以下の通りで、JSON配列のみを返してください。説明文やコメント、コードブロック（```jsonなど）は不要です。\\n\\n" +
+      "[" +
+      "{\\"title\\":\\"メニュー名\\",\\"description\\":\\"簡潔な説明文（1文）\\",\\"time\\":\\"約10分\\",\\"difficulty\\":\\"★★\\"}," +
+      "{...}" +
       "]";
 
     const chatResponse = await openai.chat.completions.create({
@@ -83,7 +53,6 @@ export default async function handler(req, res) {
       temperature: 0.7
     });
 
-    // VercelではNodeのresを使って返却
     res.statusCode = 200;
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify({
