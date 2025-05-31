@@ -44,6 +44,12 @@ export default async function handler(req, res) {
 
 ※1食として完結すること。主食（ごはん・パン・麺など）を必ず含め、予算に余裕があれば主菜または汁物を加える。
 ※副菜や軽食のみ（例：味噌汁・サラダのみ）はNG。
+※以下の形式で出力してください：
+
+1. メニュー名：簡潔な説明（1文）
+2. メニュー名：簡潔な説明（1文）
+...
+10. メニュー名：簡潔な説明（1文）
     `;
 
     const chatResponse = await openai.chat.completions.create({
