@@ -25,6 +25,40 @@
       text-align: center;
       font-size: 1.8em;
       color: #2f4f4f;
+      margin-bottom: 4px;
+    }
+    .form-group {
+      margin-bottom: 20px;
+    }
+    label {
+      display: block;
+      margin-bottom: 6px;
+      font-weight: bold;
+      font-size: 1em;
+    }
+    .required-label::after {
+      content: " *";
+      color: red;
+    }
+    select,
+    input[type="text"],
+    input[type="number"] {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 1em;
+    }
+    .checkbox-inline,
+    .checkbox-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .toggle-section {
+      display: none;
+      margin-top: 8px;
     }
     button {
       width: 100%;
@@ -37,91 +71,246 @@
       cursor: pointer;
       margin-top: 20px;
     }
+    .toggle-button {
+      background: none;
+      border: none;
+      color: #2f4f4f;
+      font-weight: bold;
+      cursor: pointer;
+      margin-bottom: 10px;
+    }
+    .section-divider {
+      border-top: 1px solid #aaa;
+      margin: 30px 0 20px;
+    }
+    .note {
+      font-size: 0.85em;
+      color: #999;
+      text-align: right;
+      margin-top: 16px;
+    }
+    .optional-heading {
+      margin-top: 12px;
+      font-weight: bold;
+      font-size: 1.1em;
+      color: #2f4f4f;
+    }
+    .intro {
+      font-size: 0.95em;
+      color: #555;
+      margin: 0 0 28px;
+      line-height: 1.6;
+      text-align: center;
+    }
+    @media screen and (max-width: 480px) {
+      .container {
+        border-radius: 0;
+        margin: 0;
+        padding: 16px;
+      }
+      h1 {
+        font-size: 1.5em;
+      }
+      button {
+        padding: 12px;
+        font-size: 0.95em;
+      }
+    }
+    .card-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: center;
+      margin-top: 24px;
+    }
     .card {
       background-color: #fffefc;
       border: 1px solid #eee;
       border-radius: 12px;
       padding: 16px;
-      margin-top: 12px;
+      width: 260px;
+      cursor: pointer;
       box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+      transition: transform 0.2s ease;
+    }
+    .card:hover {
+      transform: scale(1.02);
+    }
+    .detail-box {
+      margin-top: 24px;
+      padding: 20px;
+      background: #f9f9f9;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+    .detail-box button {
+      float: right;
+      background-color: #ccc;
+      color: #333;
+      border: none;
+      padding: 6px 10px;
+      border-radius: 6px;
+      cursor: pointer;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>ごはんGPT</h1>
+    <h1 style="margin-bottom: 24px;">ごはんGPT</h1>
+    <p class="intro">ごはんGPTは、「おなかがすいた！」と思ったときに、<br>気分や予算に応じてすぐに自炊メニューを提案してくれるアプリです。</p>
     <form id="menuForm">
-      <label>気分</label>
-      <select name="mood">
-        <option value="疲れている">疲れている</option>
-        <option value="がっつり食べたい">がっつり食べたい</option>
-      </select>
-
-      <label>予算</label>
-      <select name="budget">
-        <option value="1000">1,000円以内</option>
-        <option value="2000">2,000円以内</option>
-      </select>
-
-      <label>調理可能時間（分）</label>
-      <select name="cookingTime">
-        <option value="10">〜10分</option>
-        <option value="30">〜30分</option>
-      </select>
-
+      <p class="optional-heading">メニューを提案するために必要な情報を教えてください！</p>
+      <div class="form-group">
+        <label for="people" class="required-label">何人分の料理を作りますか？</label>
+        <select name="people" id="people">
+          <option value="1" selected>1人分</option>
+          <option value="2">2人分</option>
+          <option value="3">3人分</option>
+          <option value="4">4人分</option>
+          <option value="5">5人以上</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="mood" class="required-label">気分</label>
+        <select name="mood" id="mood">
+          <option value="">選択してください</option>
+          <option value="疲れている">疲れている（時短・簡単メニュー）</option>
+          <option value="がっつり食べたい">がっつり食べたい（ボリューム系）</option>
+          <option value="さっぱりしたい">さっぱりしたい（あっさり・ヘルシー系）</option>
+          <option value="野菜をとりたい">野菜をとりたい（バランス重視）</option>
+          <option value="お酒に合う">お酒に合う（宅飲み用）</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="budget" class="required-label">予算</label>
+        <select name="budget" id="budget">
+          <option value="1000" selected>1,000円以内</option>
+          <option value="1500">1,500円以内</option>
+          <option value="2000">2,000円以内</option>
+          <option value="2500">2,500円以内</option>
+          <option value="3000">3,000円以内</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="cookingTime" class="required-label">調理可能時間（分）</label>
+        <select name="cookingTime" id="cookingTime">
+          <option value="10" selected>〜10分</option>
+          <option value="30">〜30分</option>
+          <option value="60">〜60分</option>
+          <option value="unlimited">時間は気にしない</option>
+        </select>
+      </div>
+      <p class="optional-heading">こちらも入力すると、よりぴったりな提案になります！</p>
+      <div class="form-group">
+        <label for="genre">希望ジャンル</label>
+        <select name="genre" id="genre">
+          <option value="">指定なし</option>
+          <option value="和食">和食</option>
+          <option value="洋食">洋食</option>
+          <option value="中華">中華</option>
+          <option value="韓国">韓国</option>
+          <option value="イタリアン">イタリアン</option>
+          <option value="エスニック">エスニック</option>
+        </select>
+      </div>
+      <div class="form-group checkbox-inline">
+        <label><input type="checkbox" id="nutritionCare" name="nutritionCare"> 栄養バランスを気にする</label>
+      </div>
+      <div class="form-group">
+        <label><input type="checkbox" id="hasAllergy" name="hasAllergy" onchange="toggleAllergyInput()"> アレルギーがある</label>
+        <div class="toggle-section" id="allergyInput">
+          <input type="text" name="excludedIngredients" id="excludedIngredients" placeholder="除外したい食材を入力（例：乳、小麦）">
+        </div>
+      </div>
+      <div class="section-divider"></div>
+      <button type="button" class="toggle-button" onclick="toggleDetails()">🔧 詳細設定を開く／閉じる</button>
+      <div id="detailsArea" style="display: none;">
+        <div class="form-group">
+          <label>利用できる調理器具（複数選択可）</label>
+          <div class="checkbox-group">
+            <label><input type="checkbox" name="tools" value="電子レンジ"> 電子レンジ</label>
+            <label><input type="checkbox" name="tools" value="フライパン"> フライパン</label>
+            <label><input type="checkbox" name="tools" value="鍋"> 鍋</label>
+            <label><input type="checkbox" name="tools" value="トースター"> トースター</label>
+            <label><input type="checkbox" name="tools" value="オーブン"> オーブン</label>
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="ingredients">消費したい食材</label>
+          <input type="text" name="ingredients" id="ingredients" placeholder="例：卵、キャベツ、鶏肉">
+        </div>
+      </div>
       <button type="submit">メニューを提案する</button>
     </form>
 
-    <p id="loading" style="display:none;">メニューを提案中です…</p>
-    <div id="recipeList"></div>
-    <p id="result" style="color:red;"></p>
+    <div id="recipeList" class="card-container"></div>
+    <div id="recipeDetail" class="detail-box" style="display:none;">
+      <button onclick="hideDetails()">× 閉じる</button>
+      <h2 id="detailTitle"></h2>
+      <p id="detailContent"></p>
+    </div>
+    <p id="loading" style="display:none; color:#2f4f4f; font-weight:bold;">メニューを提案中です…</p>
+    <p class="note">※ <span style="color:red">*</span> は必須項目です</p>
   </div>
-
   <script>
-    window.onload = function () {
-      document.getElementById('menuForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        console.log("フォーム送信イベント発火！");
-        const loadingEl = document.getElementById('loading');
-        const resultEl = document.getElementById('result');
-        const list = document.getElementById("recipeList");
-
-        loadingEl.style.display = 'block';
-        resultEl.textContent = '';
-        list.innerHTML = '';
-
-        const formData = new FormData(e.target);
-        const body = Object.fromEntries(formData.entries());
-
-        try {
-          const res = await fetch('/api/gpt', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
-          });
-
-          const data = await res.json();
-          console.log("サーバー応答:", data);
-          loadingEl.style.display = 'none';
-
-          const match = data.result.match(/\[\s*{[\s\S]*?}\s*\]/);
-          if (!match) throw new Error("JSON配列が見つかりません");
-          const recipes = JSON.parse(match[0]);
-
-          recipes.forEach(recipe => {
-            const card = document.createElement("div");
-            card.className = "card";
-            card.innerHTML = `<h3>${recipe.title}</h3><p>${recipe.description}</p>`;
-            list.appendChild(card);
-          });
-
-        } catch (err) {
-          loadingEl.style.display = 'none';
-          console.error(err);
-          resultEl.textContent = 'エラーが発生しました。';
-        }
-      });
+    function toggleAllergyInput() {
+      const checkbox = document.getElementById('hasAllergy');
+      const inputField = document.getElementById('allergyInput');
+      inputField.style.display = checkbox.checked ? 'block' : 'none';
     }
+    function toggleDetails() {
+      const details = document.getElementById('detailsArea');
+      details.style.display = details.style.display === 'none' ? 'block' : 'none';
+    }
+    function showDetails(recipe) {
+      document.getElementById("detailTitle").innerText = recipe.title;
+      document.getElementById("detailContent").innerHTML = `
+        <p>${recipe.description}</p>
+        <p><strong>所要時間:</strong> ${recipe.time} ｜ <strong>難易度:</strong> ${recipe.difficulty}</p>
+      `;
+      document.getElementById("recipeDetail").style.display = "block";
+    }
+    function hideDetails() {
+      document.getElementById("recipeDetail").style.display = "none";
+    }
+
+    document.getElementById('menuForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const loadingEl = document.getElementById('loading');
+      const list = document.getElementById("recipeList");
+      loadingEl.style.display = 'block';
+      list.innerHTML = '';
+      const formData = new FormData(e.target);
+      const body = Object.fromEntries(formData.entries());
+      body.tools = formData.getAll('tools');
+
+      try {
+        const res = await fetch('/api/gpt', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        loadingEl.style.display = 'none';
+        const match = data.result.match(/\[\s*\{[\s\S]+?\}\s*\]/);
+        if (!match) {
+          list.innerHTML = '<p>レシピが取得できませんでした。</p>';
+          return;
+        }
+        const recipes = JSON.parse(match[0]);
+        recipes.forEach(recipe => {
+          const card = document.createElement("div");
+          card.className = "card";
+          card.innerHTML = `<h3>${recipe.title}</h3>`;
+          card.onclick = () => showDetails(recipe);
+          list.appendChild(card);
+        });
+        hideDetails();
+      } catch (err) {
+        loadingEl.style.display = 'none';
+        list.innerHTML = '<p>エラーが発生しました。</p>';
+      }
+    });
   </script>
 </body>
 </html>
