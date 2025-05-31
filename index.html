@@ -93,6 +93,36 @@
       line-height: 1.6;
       text-align: center;
     }
+    #loading {
+      text-align: center;
+      font-weight: bold;
+      color: #2f4f4f;
+      margin-top: 20px;
+      display: none;
+    }
+    .card-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: center;
+      margin-top: 24px;
+    }
+    .card {
+      background-color: #fffefc;
+      border: 1px solid #eee;
+      border-radius: 12px;
+      padding: 16px;
+      width: 260px;
+      cursor: pointer;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+      transition: transform 0.2s ease;
+    }
+    .card:hover {
+      transform: scale(1.02);
+    }
+    .card.selected {
+      border: 2px solid #2f4f4f;
+    }
   </style>
 </head>
 <body>
@@ -190,10 +220,11 @@
           <input type="text" id="ingredients" name="ingredients" placeholder="例：卵、キャベツ、鶏肉">
         </details>
       </div>
-
       <button type="submit">メニューを提案する</button>
       <p class="note">※ <span style="color:red">*</span> は必須項目です</p>
     </form>
+    <p id="loading">メニューを提案中です…</p>
+    <div id="recipeList" class="card-container"></div>
   </div>
 
   <script>
@@ -203,6 +234,11 @@
       const body = Object.fromEntries(formData.entries());
       body.tools = formData.getAll('tools');
 
+      const loadingEl = document.getElementById('loading');
+      const resultEl = document.getElementById('recipeList');
+      loadingEl.style.display = 'block';
+      resultEl.innerHTML = '';
+
       try {
         const res = await fetch('/api/gpt', {
           method: 'POST',
@@ -211,9 +247,32 @@
         });
 
         const data = await res.json();
-        alert('提案されたメニュー: ' + JSON.stringify(data.result));
+        loadingEl.style.display = 'none';
+
+        const match = data.result.match(/\[\s*\{[\s\S]+?\}\s*\]/);
+        if (!match) {
+          resultEl.innerHTML = '<p>レシピが取得できませんでした。</p>';
+          return;
+        }
+
+        const recipes = JSON.parse(match[0]);
+        recipes.forEach(recipe => {
+          const card = document.createElement("div");
+          card.className = "card";
+          card.innerHTML = `
+            <h3>${recipe.title}</h3>
+            <p>${recipe.description}</p>
+            <p><strong>所要時間:</strong> ${recipe.time} ｜ <strong>難易度:</strong> ${recipe.difficulty}</p>
+          `;
+          card.onclick = () => {
+            document.querySelectorAll(".card").forEach(c => c.classList.remove("selected"));
+            card.classList.add("selected");
+          };
+          resultEl.appendChild(card);
+        });
       } catch (err) {
-        alert('エラーが発生しました。');
+        loadingEl.style.display = 'none';
+        resultEl.innerHTML = '<p>エラーが発生しました。</p>';
       }
     });
   </script>
