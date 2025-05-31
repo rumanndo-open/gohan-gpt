@@ -274,7 +274,8 @@
       const details = document.getElementById('detailsArea');
       details.style.display = details.style.display === 'none' ? 'block' : 'none';
     }
-    document.getElementById('menuForm').addEventListener('submit', async (e) => {
+    window.onload = function() {
+  document.getElementById('menuForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const loadingEl = document.getElementById('loading');
   const resultEl = document.getElementById('result');
@@ -294,6 +295,7 @@
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
+}
 
     const data = await res.json();
     loadingEl.style.display = 'none';
@@ -346,6 +348,7 @@
     document.getElementById("recipeDetail").style.display = "none";
   }
 
+  window.onload = function() {
   document.getElementById('menuForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     const loadingEl = document.getElementById('loading');
@@ -366,6 +369,7 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body)
       });
+}
 
       const data = await res.json();
       loadingEl.style.display = 'none';
