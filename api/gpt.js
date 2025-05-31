@@ -1,4 +1,3 @@
-
 import fs from 'fs';
 import path from 'path';
 import OpenAI from 'openai';
@@ -16,7 +15,6 @@ export default async function handler(req, res) {
 
     const {
       mood,
-      range,
       ingredients,
       budget,
       genre,
@@ -30,12 +28,12 @@ export default async function handler(req, res) {
     const prompt = promptTemplate
       .replace('{nutritionNote}', nutritionCare ? '栄養バランスも考慮した' : '')
       .replace('{mood}', mood || '指定なし')
-      .replace('{range}', range || '指定なし')
+      .replace('{range}', '自宅') // 明示的に固定
       .replace('{ingredients}', ingredients || '指定なし')
       .replace('{budget}', budget || '指定なし')
       .replace('{genre}', genre || '指定なし')
       .replace('{cookingTime}', cookingTime || '指定なし')
-      .replace('{allergyNote}', excludedIngredients ? `以下の食材を除外してください：${excludedIngredients}` : '');
+      .replace('{allergyNote}', excludedIngredients ? `除外食材：${excludedIngredients}` : '除外食材：なし');
 
     const chatResponse = await openai.chat.completions.create({
       model: 'gpt-4o',
@@ -43,9 +41,13 @@ export default async function handler(req, res) {
       temperature: 0.7
     });
 
-    res.status(200).json({
-      result: chatResponse.choices[0].message.content
-    });
+    const result = chatResponse.choices[0]?.message?.content;
+
+    if (!result) {
+      throw new Error("OpenAI からの応答が空です");
+    }
+
+    res.status(200).json({ result });
 
   } catch (error) {
     console.error('エラー:', error);
