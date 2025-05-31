@@ -337,7 +337,7 @@
     document.getElementById("detailTitle").innerText = recipe.title;
     document.getElementById("detailContent").innerHTML = `
       <p>${recipe.description}</p>
-      <p><strong>所要時間:</strong> ${recipe.time} ｜ <strong>難易度:</strong> ${recipe.difficulty}</p>
+      <p><strong>所要時間:</strong> 約${recipe.time} ｜ <strong>難易度:</strong> ${recipe.difficulty}</p>
     `;
     document.getElementById("recipeDetail").style.display = "block";
   }
@@ -370,13 +370,17 @@
       const data = await res.json();
       loadingEl.style.display = 'none';
 
-      const match = data.result.match(/\[\s*\{[\s\S]+?\}\s*\]/);
-      if (!match) {
-        resultEl.textContent = 'レシピが取得できませんでした。';
+      let recipes = [];
+      try {
+        const match = data.result.match(/\[\s*{[\s\S]*?}\s*\]/);
+        if (!match) throw new Error("JSON配列が見つかりません");
+        recipes = JSON.parse(match[0]);
+      } catch (err) {
+        console.error("JSON解析エラー:", err);
+        resultEl.textContent = 'メニューの取得に失敗しました。';
         return;
       }
 
-      const recipes = JSON.parse(match[0]);
       recipes.forEach(recipe => {
         const card = document.createElement("div");
         card.className = "card";
