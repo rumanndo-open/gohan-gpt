@@ -101,7 +101,6 @@
       line-height: 1.6;
       text-align: center;
     }
-
     @media screen and (max-width: 480px) {
       .container {
         border-radius: 0;
@@ -124,7 +123,7 @@
     <p class="intro">
       ごはんGPTは、「おなかがすいた！」と思ったときに、<br>気分や予算に応じてすぐに自炊メニューを提案してくれるアプリです。
     </p>
-    <form>
+    <form id="menuForm">
       <p class="optional-heading">メニューを提案するために必要な情報を教えてください！</p>
       <div class="form-group">
         <label for="people" class="required-label">何人分の料理を作りますか？</label>
@@ -136,7 +135,6 @@
           <option value="5">5人以上</option>
         </select>
       </div>
-
       <div class="form-group">
         <label for="mood" class="required-label">気分</label>
         <select name="mood" id="mood">
@@ -148,29 +146,26 @@
           <option value="お酒に合う">お酒に合う（宅飲み用）</option>
         </select>
       </div>
-
       <div class="form-group">
         <label for="budget" class="required-label">予算</label>
-        <select name="budget" id="budget">$1<option value="1000" selected>1,000円以内</option>
+        <select name="budget" id="budget">
+          <option value="1000" selected>1,000円以内</option>
           <option value="1500">1,500円以内</option>
           <option value="2000">2,000円以内</option>
           <option value="2500">2,500円以内</option>
           <option value="3000">3,000円以内</option>
         </select>
       </div>
-
       <div class="form-group">
         <label for="cookingTime" class="required-label">調理可能時間（分）</label>
-        <select name="cookingTime" id="cookingTime">$1<option value="10" selected>〜10分</option>
+        <select name="cookingTime" id="cookingTime">
+          <option value="10" selected>〜10分</option>
           <option value="30">〜30分</option>
           <option value="60">〜60分</option>
           <option value="unlimited">時間は気にしない</option>
         </select>
       </div>
-
       <p class="optional-heading">こちらも入力すると、よりぴったりな提案になります！</p>
-
-
       <div class="form-group">
         <label for="genre">希望ジャンル</label>
         <select name="genre" id="genre">
@@ -192,7 +187,6 @@
           <input type="text" name="excludedIngredients" placeholder="除外したい食材を入力（例：乳、小麦）">
         </div>
       </div>
-
       <div class="section-divider"></div>
       <button type="button" class="toggle-button" onclick="toggleDetails()">🔧 詳細設定を開く／閉じる</button>
       <div id="detailsArea" style="display: none;">
@@ -211,9 +205,10 @@
           <input type="text" name="ingredients" id="ingredients" placeholder="例：卵、キャベツ、鶏肉">
         </div>
       </div>
-
       <button type="submit">メニューを提案する</button>
     </form>
+    <p id="loading" style="display:none; color:#2f4f4f; font-weight:bold;">メニューを提案中です…</p>
+    <pre id="result" style="white-space:pre-wrap; background:#f9f9f9; padding:10px; border-radius:8px; margin-top:10px;"></pre>
     <p class="note">※ <span style="color:red">*</span> は必須項目です</p>
   </div>
   <script>
@@ -226,6 +221,29 @@
       const details = document.getElementById('detailsArea');
       details.style.display = details.style.display === 'none' ? 'block' : 'none';
     }
+    document.getElementById('menuForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const loadingEl = document.getElementById('loading');
+      const resultEl = document.getElementById('result');
+      loadingEl.style.display = 'block';
+      resultEl.textContent = '';
+      const formData = new FormData(e.target);
+      const body = Object.fromEntries(formData.entries());
+      body.tools = formData.getAll('tools');
+      try {
+        const res = await fetch('/api/gpt', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        loadingEl.style.display = 'none';
+        resultEl.textContent = data.result || '提案が見つかりませんでした。';
+      } catch (err) {
+        loadingEl.style.display = 'none';
+        resultEl.textContent = 'エラーが発生しました。';
+      }
+    });
   </script>
 </body>
 </html>
