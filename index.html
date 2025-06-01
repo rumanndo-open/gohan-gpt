@@ -152,7 +152,13 @@
     </div>
   </div>
 
+  <div id="recipeList" class="card-container"></div>
+
   <script>
+    function closeModal() {
+      document.getElementById("modal").style.display = "none";
+    }
+
     async function handleCardSelection(card, recipe) {
       if (card.dataset.loaded === "true") return;
       card.dataset.loaded = "true";
@@ -178,11 +184,7 @@
       }
     }
 
-    function closeModal() {
-      document.getElementById("modal").style.display = "none";
-    }
-
-    async function renderRecipes(recipes) {
+    function renderRecipes(recipes) {
       const resultEl = document.getElementById('recipeList');
       resultEl.innerHTML = '';
       recipes.forEach(recipe => {
@@ -197,6 +199,19 @@
         resultEl.appendChild(card);
       });
     }
+
+    // 仮の例：テスト用に呼び出し（API側が機能している前提）
+    window.addEventListener('DOMContentLoaded', () => {
+      fetch('/api/gpt-test')
+        .then(res => res.json())
+        .then(data => {
+          const match = data.result.match(/\[\s*\{[\s\S]+?\}\s*\]/);
+          if (!match) return;
+          const recipes = JSON.parse(match[0]);
+          renderRecipes(recipes);
+        })
+        .catch(err => console.error('初期レシピ取得に失敗:', err));
+    });
   </script>
 </body>
 <!-- HTML body 続きは既存のフォームやカード出力が入る部分になります -->
