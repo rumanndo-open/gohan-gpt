@@ -394,6 +394,9 @@
 <div id="modalOverlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:999;" onclick="closeModal()"></div>
 
 <script>
+  const recipeCache = {};
+  let isLoading = false;
+
   document.addEventListener("DOMContentLoaded", () => {
     const cards = document.querySelectorAll('.menu-card');
     cards.forEach(card => {
@@ -405,6 +408,17 @@
   });
 
   async function fetchRecipe(menuTitle) {
+    if (isLoading) return;
+
+    if (recipeCache[menuTitle]) {
+      document.getElementById('recipeTitle').textContent = menuTitle + '（取得済み）';
+      document.getElementById('recipeContent').textContent = recipeCache[menuTitle];
+      document.getElementById('recipeModal').style.display = 'block';
+      document.getElementById('modalOverlay').style.display = 'block';
+      return;
+    }
+
+    isLoading = true;
     try {
       const response = await fetch('/api/gpt.js', {
         method: 'POST',
@@ -412,13 +426,18 @@
         body: JSON.stringify({ title: menuTitle })
       });
       const result = await response.json();
+      const recipeText = result.recipe || 'レシピが取得できませんでした。';
+
+      recipeCache[menuTitle] = recipeText;
       document.getElementById('recipeTitle').textContent = menuTitle;
-      document.getElementById('recipeContent').textContent = result.recipe || 'レシピが取得できませんでした。';
+      document.getElementById('recipeContent').textContent = recipeText;
       document.getElementById('recipeModal').style.display = 'block';
       document.getElementById('modalOverlay').style.display = 'block';
     } catch (error) {
       console.error(error);
       alert('エラーが発生しました');
+    } finally {
+      isLoading = false;
     }
   }
 
