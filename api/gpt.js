@@ -13,6 +13,17 @@ export default async function handler(req, res) {
     const rawBody = Buffer.concat(buffers).toString();
     const body = JSON.parse(rawBody);
 
+        if (body.selectedRecipe) {
+      const detailPrompt = `${body.selectedRecipe} の具体的な作り方を教えてください。`;
+      const chatResponse = await openai.chat.completions.create({
+        model: 'gpt-4o',
+        messages: [{ role: 'user', content: detailPrompt }],
+        temperature: 0.7
+      });
+      const result = chatResponse.choices[0]?.message?.content;
+      return res.status(200).json({ result });
+    }
+    
     const {
       mood,
       ingredients,
