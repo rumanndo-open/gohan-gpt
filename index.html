@@ -191,10 +191,48 @@
         resultEl.appendChild(card);
       });
     }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('menuForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const body = Object.fromEntries(formData.entries());
+        body.tools = formData.getAll('tools');
+
+        const loadingEl = document.getElementById('loading');
+        const resultEl = document.getElementById('recipeList');
+        loadingEl.style.display = 'block';
+        resultEl.innerHTML = '';
+
+        try {
+          const res = await fetch('/api/gpt', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+          });
+
+          const data = await res.json();
+          loadingEl.style.display = 'none';
+
+          const match = data.result.match(/\[\s*\{[\s\S]+?\}\s*\]/);
+          if (!match) {
+            resultEl.innerHTML = '<p>レシピが取得できませんでした。</p>';
+            return;
+          }
+
+          const recipes = JSON.parse(match[0]);
+          renderRecipes(recipes);
+        } catch (err) {
+          loadingEl.style.display = 'none';
+          resultEl.innerHTML = '<p>エラーが発生しました。</p>';
+        }
+      });
+    });
   </script>
 </head>
 <body>
 <!-- HTML body 続きは既存のフォームやカード出力が入る部分になります -->
+
 
   <div class="container">
     <h1>ごはんGPT</h1>
