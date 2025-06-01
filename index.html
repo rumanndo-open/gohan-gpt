@@ -118,6 +118,7 @@
       cursor: pointer;
       box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       transition: transform 0.2s ease, box-shadow 0.2s ease;
+      position: relative;
     }
     .card:hover {
       transform: scale(1.02);
@@ -136,11 +137,19 @@
       margin: 0.5em 0;
       line-height: 1.5;
     }
+    .loading-message {
+      font-size: 0.9em;
+      color: #666;
+      margin-top: 10px;
+    }
   </style>
   <script>
     async function handleCardSelection(card, recipe) {
       document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
       card.classList.add('selected');
+
+      const existingDetail = card.querySelector('pre');
+      if (existingDetail) existingDetail.remove();
 
       const detailLoading = document.createElement('p');
       detailLoading.textContent = 'レシピ詳細を生成中です...';
@@ -151,13 +160,7 @@
         const res = await fetch('/api/gpt', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            selectedRecipe: recipe.title,
-            ingredients: recipe.ingredients || '',
-            mood: '',
-            budget: '',
-            cookingTime: ''
-          })
+          body: JSON.stringify({ selectedRecipe: recipe.title })
         });
 
         const data = await res.json();
@@ -166,7 +169,7 @@
         const detailText = document.createElement('pre');
         detailText.style.whiteSpace = 'pre-wrap';
         detailText.style.marginTop = '10px';
-        detailText.textContent = data.result;
+        detailText.textContent = data.result || 'レシピが取得できませんでした';
         card.appendChild(detailText);
       } catch (err) {
         detailLoading.textContent = 'エラーが発生しました。';
@@ -175,6 +178,8 @@
   </script>
 </head>
 <body>
+<!-- HTML body 続きは既存のフォームやカード出力が入る部分になります -->
+
 
 
 
