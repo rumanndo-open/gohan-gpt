@@ -175,13 +175,26 @@
         detailLoading.textContent = 'エラーが発生しました。';
       }
     }
+
+    async function renderRecipes(recipes) {
+      const resultEl = document.getElementById('recipeList');
+      resultEl.innerHTML = '';
+      recipes.forEach(recipe => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <h3>${recipe.title}</h3>
+          <p>${recipe.description}</p>
+          <p><strong>所要時間:</strong> ${recipe.time} ｜ <strong>難易度:</strong> ${recipe.difficulty}</p>
+        `;
+        card.onclick = () => handleCardSelection(card, recipe);
+        resultEl.appendChild(card);
+      });
+    }
   </script>
 </head>
 <body>
 <!-- HTML body 続きは既存のフォームやカード出力が入る部分になります -->
-
-
-
 
   <div class="container">
     <h1>ごはんGPT</h1>
