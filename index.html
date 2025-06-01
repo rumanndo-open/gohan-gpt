@@ -26,80 +26,6 @@
       color: #2f4f4f;
       margin-bottom: 4px;
     }
-    .form-group {
-      margin-bottom: 20px;
-    }
-    label {
-      display: block;
-      margin-bottom: 6px;
-      font-weight: bold;
-      font-size: 1em;
-    }
-    .required-label::after {
-      content: " *";
-      color: red;
-    }
-    select,
-    input[type="text"],
-    input[type="number"] {
-      width: 100%;
-      box-sizing: border-box;
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      font-size: 1em;
-    }
-    .checkbox-inline,
-    .checkbox-group {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-    }
-    .toggle-section {
-      display: none;
-      margin-top: 8px;
-    }
-    button {
-      width: 100%;
-      padding: 14px;
-      border: none;
-      border-radius: 12px;
-      background-color: #2f4f4f;
-      color: white;
-      font-size: 1em;
-      cursor: pointer;
-      margin-top: 20px;
-    }
-    .section-divider {
-      border-top: 1px solid #aaa;
-      margin: 30px 0 20px;
-    }
-    .note {
-      font-size: 0.85em;
-      color: #999;
-      text-align: right;
-      margin-top: 16px;
-    }
-    .optional-heading {
-      margin-top: 12px;
-      font-weight: bold;
-      font-size: 1.1em;
-      color: #2f4f4f;
-    }
-    .intro {
-      font-size: 0.95em;
-      color: #555;
-      margin: 0 0 28px;
-      line-height: 1.6;
-      text-align: center;
-    }
-    #loading {
-      text-align: center;
-      font-weight: bold;
-      color: #2f4f4f;
-      margin-top: 20px;
-      display: none;
-    }
     .card-container {
       display: flex;
       flex-wrap: wrap;
@@ -124,10 +50,6 @@
       transform: scale(1.02);
       box-shadow: 0 6px 16px rgba(0,0,0,0.12);
     }
-    .card.selected {
-      border: 2px solid #2f4f4f;
-      background-color: #f3f8f8;
-    }
     .card h3 {
       margin-top: 0;
       color: #2f4f4f;
@@ -137,22 +59,20 @@
       margin: 0.5em 0;
       line-height: 1.5;
     }
-    .loading-message {
-      font-size: 0.9em;
-      color: #666;
-      margin-top: 10px;
-    }
   </style>
 </head>
 <body>
+  <div class="container">
+    <h1>ごはんGPT</h1>
+    <div id="recipeList" class="card-container"></div>
+  </div>
+
   <div id="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:9999;">
     <div style="background:#fff; padding:20px; border-radius:10px; max-width:90%; max-height:80%; overflow:auto; position:relative;">
       <button onclick="closeModal()" style="position:absolute; top:10px; right:10px; font-size:1.2em;">✖</button>
       <div id="modalContent"></div>
     </div>
   </div>
-
-  <div id="recipeList" class="card-container"></div>
 
   <script>
     function closeModal() {
@@ -200,7 +120,6 @@
       });
     }
 
-    // 仮の例：テスト用に呼び出し（API側が機能している前提）
     window.addEventListener('DOMContentLoaded', () => {
       fetch('/api/gpt-test')
         .then(res => res.json())
