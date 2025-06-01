@@ -137,6 +137,15 @@
       line-height: 1.5;
     }
   </style>
+  <script>
+    function handleCardSelection(card, recipe) {
+      document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
+      card.classList.add('selected');
+
+      const detail = `\n\n■ ${recipe.title}\n\n${recipe.description}\n\n【所要時間】${recipe.time}\n【難易度】${recipe.difficulty}`;
+      alert("選択されたレシピ:\n" + detail);
+    }
+  </script>
 </head>
 <body>
 
