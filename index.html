@@ -108,26 +108,38 @@
       margin-top: 24px;
     }
     .card {
-      background-color: #fffefc;
-      border: 1px solid #eee;
-      border-radius: 12px;
-      padding: 16px;
+      background-color: #fff;
+      border: 1px solid #ddd;
+      border-radius: 16px;
+      padding: 20px;
       flex: 1 1 320px;
       max-width: 500px;
       box-sizing: border-box;
       cursor: pointer;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.06);
-      transition: transform 0.2s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
     .card:hover {
       transform: scale(1.02);
+      box-shadow: 0 6px 16px rgba(0,0,0,0.12);
     }
     .card.selected {
       border: 2px solid #2f4f4f;
+      background-color: #f3f8f8;
+    }
+    .card h3 {
+      margin-top: 0;
+      color: #2f4f4f;
+      font-size: 1.2em;
+    }
+    .card p {
+      margin: 0.5em 0;
+      line-height: 1.5;
     }
   </style>
 </head>
 <body>
+
 
   <div class="container">
     <h1>ごはんGPT</h1>
