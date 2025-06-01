@@ -145,16 +145,8 @@
   </style>
   <script>
     async function handleCardSelection(card, recipe) {
-      document.querySelectorAll('.card').forEach(c => c.classList.remove('selected'));
-      card.classList.add('selected');
-
-      const existingDetail = card.querySelector('pre');
-      if (existingDetail) existingDetail.remove();
-
-      const detailLoading = document.createElement('p');
-      detailLoading.textContent = 'レシピ詳細を生成中です...';
-      detailLoading.classList.add('loading-message');
-      card.appendChild(detailLoading);
+      if (card.dataset.loaded === "true") return;
+      card.dataset.loaded = "true";
 
       try {
         const res = await fetch('/api/gpt', {
@@ -164,16 +156,21 @@
         });
 
         const data = await res.json();
-        detailLoading.remove();
 
-        const detailText = document.createElement('pre');
-        detailText.style.whiteSpace = 'pre-wrap';
-        detailText.style.marginTop = '10px';
-        detailText.textContent = data.result || 'レシピが取得できませんでした';
-        card.appendChild(detailText);
+        const modal = document.getElementById("modal");
+        const content = document.getElementById("modalContent");
+        content.innerHTML = `
+          <h2>${recipe.title}</h2>
+          <pre style="white-space:pre-wrap;">${data.result || 'レシピが取得できませんでした'}</pre>
+        `;
+        modal.style.display = "flex";
       } catch (err) {
-        detailLoading.textContent = 'エラーが発生しました。';
+        alert("レシピの取得に失敗しました。");
       }
+    }
+
+    function closeModal() {
+      document.getElementById("modal").style.display = "none";
     }
 
     async function renderRecipes(recipes) {
@@ -191,46 +188,16 @@
         resultEl.appendChild(card);
       });
     }
-
-    window.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('menuForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const formData = new FormData(e.target);
-        const body = Object.fromEntries(formData.entries());
-        body.tools = formData.getAll('tools');
-
-        const loadingEl = document.getElementById('loading');
-        const resultEl = document.getElementById('recipeList');
-        loadingEl.style.display = 'block';
-        resultEl.innerHTML = '';
-
-        try {
-          const res = await fetch('/api/gpt', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
-          });
-
-          const data = await res.json();
-          loadingEl.style.display = 'none';
-
-          const match = data.result.match(/\[\s*\{[\s\S]+?\}\s*\]/);
-          if (!match) {
-            resultEl.innerHTML = '<p>レシピが取得できませんでした。</p>';
-            return;
-          }
-
-          const recipes = JSON.parse(match[0]);
-          renderRecipes(recipes);
-        } catch (err) {
-          loadingEl.style.display = 'none';
-          resultEl.innerHTML = '<p>エラーが発生しました。</p>';
-        }
-      });
-    });
   </script>
 </head>
 <body>
+  <div id="modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background-color:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:9999;">
+    <div style="background:#fff; padding:20px; border-radius:10px; max-width:90%; max-height:80%; overflow:auto; position:relative;">
+      <button onclick="closeModal()" style="position:absolute; top:10px; right:10px; font-size:1.2em;">✖</button>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+</body>
 <!-- HTML body 続きは既存のフォームやカード出力が入る部分になります -->
 
 
