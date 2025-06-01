@@ -384,5 +384,48 @@
       }
     });
   </script>
+
+<!-- レシピモーダル -->
+<div id="recipeModal" style="display:none; position:fixed; top:10%; left:10%; right:10%; background:#fff; padding:20px; border-radius:12px; box-shadow:0 0 20px rgba(0,0,0,0.3); z-index:1000;">
+  <button onclick="closeModal()" style="float:right;">×</button>
+  <h2 id="recipeTitle"></h2>
+  <pre id="recipeContent" style="white-space:pre-wrap;"></pre>
+</div>
+<div id="modalOverlay" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:999;" onclick="closeModal()"></div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    const cards = document.querySelectorAll('.menu-card');
+    cards.forEach(card => {
+      const title = card.getAttribute('data-title');
+      if (title) {
+        card.addEventListener('click', () => fetchRecipe(title));
+      }
+    });
+  });
+
+  async function fetchRecipe(menuTitle) {
+    try {
+      const response = await fetch('/api/gpt.js', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: menuTitle })
+      });
+      const result = await response.json();
+      document.getElementById('recipeTitle').textContent = menuTitle;
+      document.getElementById('recipeContent').textContent = result.recipe || 'レシピが取得できませんでした。';
+      document.getElementById('recipeModal').style.display = 'block';
+      document.getElementById('modalOverlay').style.display = 'block';
+    } catch (error) {
+      console.error(error);
+      alert('エラーが発生しました');
+    }
+  }
+
+  function closeModal() {
+    document.getElementById('recipeModal').style.display = 'none';
+    document.getElementById('modalOverlay').style.display = 'none';
+  }
+</script>
 </body>
 </html>
